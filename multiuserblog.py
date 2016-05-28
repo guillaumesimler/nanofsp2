@@ -32,11 +32,11 @@ class Handler(webapp2.RequestHandler):
 
 class MainPage(Handler):
     def render_pages(self, subject = "", text = "", error = ""):
-        self.render("front.html", subject = subject, text = text, error = error)
+        self.render("front-page.html", subject = subject, text = text, error = error)
 
 
     def get(self):
-        self.write("Hello Guillaume !!!")
+        self.render_pages()
 
 
     def post(self):
