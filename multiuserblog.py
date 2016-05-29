@@ -67,15 +67,13 @@ class NewPostHandler(Handler):
 class NewPostDisplay(Handler):
     def get(self, keyid):
         
-        # to be replaced
         key = db.Key.from_path('Blogentries', int(keyid))
         display = db.get(key)
 
         if not display:
             self.error(404)
 
-        # end of the replacement 
-
+     
         self.render("single_entry.html", display = display)
 
 
