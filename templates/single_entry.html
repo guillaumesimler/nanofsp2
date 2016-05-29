@@ -1,0 +1,20 @@
+{% extends "page.html" %}
+
+{% block content %}
+	
+		<article>
+			<div> 
+				<span class="title">{{display.title}}</span>
+				<span class="date">{{display.date}}</span>
+			</div>
+
+			<hr>
+			
+			<pre>{{display.bodytext | safe}}</pre>
+		</article>
+
+
+
+	
+
+{% endblock %}

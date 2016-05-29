@@ -1,9 +1,28 @@
+a {
+	text-decoration: none;
+	color: black;
+}
+
 p {
 	font-weight: bold;
 }
 
+.post-header{
+	min-height: 24px;
+}
 
 .text_area {
 	width: 400px;
 	height: 500px;
 }
+
+.title{
+	position: absolute;
+	left: 0px;
+}
+
+.date {
+	position: absolute;
+	right: 0px;
+	text-align: right;
+};

@@ -4,14 +4,18 @@
 	
 	{% for entry in blogentries %}
 		<article>
-			<div> 
-				<span class="title">{{entry.title}}</span>
-				<span class="date">{{entry.date}}</span>
+			<div class="post-header"> 
+				<a href="/blog/{{entry.objkey}}">
+					<span class="title">{{entry.title}}</span>
+					<span class="date">{{entry.date}}</span>
+				</a>
+
+				
 			</div>
 
 			<hr>
 			
-			<pre>{{entry.bodytext}}</pre>
+			<pre>{{entry.bodytext | safe}}</pre>
 		</article>
 
 

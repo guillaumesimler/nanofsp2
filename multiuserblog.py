@@ -27,8 +27,10 @@ class Handler(webapp2.RequestHandler):
 # Create the entity (Google Datastore's table)
 
 
-blogentries = [{"title": "A first Test", "bodytext": "A convincing first test", "date": "26.05.2016"}, 
-               {"title": "A second Test", "bodytext": "The confirmation", "date": "29.05.2016"}]
+blogentries = [{"title": "A first Test", "bodytext": "A convincing first test", "date": "26.05.2016", "objkey" : 1}, 
+               {"title": "A second Test", "bodytext": "The confirmation", "date": "29.05.2016", "objkey" : 2}]
+
+ 
 
 # Main Classes
 
@@ -44,8 +46,12 @@ class NewPostHandler(Handler):
         title = self.request.get("title")
         bodytext = self.request.get("bodytext")
 
+        # to be simplified with the data base
+        objkey = len(blogentries) + 1
+        
+
         if bodytext and title:
-            temp = {"title": title, "bodytext": bodytext, "date": "30.05.2016"}
+            temp = {"title": title, "bodytext": bodytext, "date": "30.05.2016", "objkey": objkey}
 
             blogentries.append(temp)
 
@@ -56,21 +62,36 @@ class NewPostHandler(Handler):
             self.render_newpost(title, bodytext, error)
 
 
-class MainPage(Handler):
-    def render_pages(self, error = ""):
+class NewPostDisplay(Handler):
+    def get(self, key):
+        
+        # to be replaced
+        key = int(key)
 
+        for entry in blogentries:
+            if entry["objkey"] == key:
+                display = entry             
+            
+            else:
+                self.error(404)
+
+        # end of the replacement 
+
+        self.render("single_entry.html", display = display)
+
+
+class MainPage(Handler):
+
+    def get(self):
         self.render("front-page.html", blogentries = blogentries)
 
 
-    def get(self):
-        self.render_pages()
 
 
-
-
-# Function triggering the 
+# Function triggering the page generation
 app = webapp2.WSGIApplication([
                              ('/blog', MainPage),
-                             ('/blog/newpost', NewPostHandler)
+                             ('/blog/newpost', NewPostHandler),
+                             ('/blog/([0-9]+)', NewPostDisplay)
                             ], 
 debug=True)

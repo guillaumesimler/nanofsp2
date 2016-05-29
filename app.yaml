@@ -5,10 +5,12 @@ api_version: 1
 threadsafe: yes
 
 handlers:
+- url: /templates/css
+  static_dir: templates/css
+
 - url: .*
   script: multiuserblog.app
-- url: /css
-  static_dir: css
+
 
 libraries:
 - name: webapp2
