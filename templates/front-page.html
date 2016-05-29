@@ -1,9 +1,23 @@
 {% extends "page.html" %}
 
 {% block content %}
-	<article>
-		<div>Bonjour Guillaume</div>
+	
+	{% for entry in blogentries %}
+		<article>
+			<div> 
+				<span class="title">{{entry.title}}</span>
+				<span class="date">{{entry.date}}</span>
+			</div>
 
-	</article>
+			<hr>
+			
+			<pre>{{entry.bodytext}}</pre>
+		</article>
+
+
+	
+	{% endfor %}
+
+	
 
 {% endblock %}

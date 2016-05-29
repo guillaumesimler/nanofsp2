@@ -27,26 +27,50 @@ class Handler(webapp2.RequestHandler):
 # Create the entity (Google Datastore's table)
 
 
+blogentries = [{"title": "A first Test", "bodytext": "A convincing first test", "date": "26.05.2016"}, 
+               {"title": "A second Test", "bodytext": "The confirmation", "date": "29.05.2016"}]
 
-# Main Class(es)
+# Main Classes
+
+class NewPostHandler(Handler):
+    def render_newpost(self, title="", bodytext="", error=""):
+        self.render("newpost.html", title = title, bodytext = bodytext, error = error)
+
+    def get(self):
+        self.render_newpost()
+
+    def post(self):
+
+        title = self.request.get("title")
+        bodytext = self.request.get("bodytext")
+
+        if bodytext and title:
+            temp = {"title": title, "bodytext": bodytext, "date": "30.05.2016"}
+
+            blogentries.append(temp)
+
+            self.redirect('/blog')
+        else:
+            error = "Something went wrong. The title or the bodytext were not filled"
+
+            self.render_newpost(title, bodytext, error)
+
 
 class MainPage(Handler):
-    def render_pages(self, subject = "", text = "", error = ""):
-        self.render("front-page.html", subject = subject, text = text, error = error)
+    def render_pages(self, error = ""):
+
+        self.render("front-page.html", blogentries = blogentries)
 
 
     def get(self):
         self.render_pages()
 
 
-    def post(self):
-        title = self.request.get("title")
-        art = self.request.get("art")
-
 
 
 # Function triggering the 
 app = webapp2.WSGIApplication([
-                             ('/', MainPage)
+                             ('/blog', MainPage),
+                             ('/blog/newpost', NewPostHandler)
                             ], 
 debug=True)
