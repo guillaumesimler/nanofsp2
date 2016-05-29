@@ -1,7 +1,12 @@
 {% extends "page.html" %}
 
 {% block content %}
-	
+		<div class="new_entry">
+			<a href="/blog/newpost">New Entry</a>
+		</div>
+
+
+
 	{% for entry in blogentries %}
 		<article>
 			<div class="post-header"> 
