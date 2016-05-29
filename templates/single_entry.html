@@ -3,18 +3,21 @@
 {% block content %}
 	
 		<article>
-			<div> 
-				<span class="title">{{display.title}}</span>
-				<span class="date">{{display.date}}</span>
+			<div class="post-header">
+				<div class="title">
+					<a href="/blog/{{display.objkey}}"><b>{{display.title}}</b></a>, posted by <span class="author">Guillaume</span>
+	
+				</div>
+
+				<div class="date">
+					{{display.date}}
+				</div>
 			</div>
 
 			<hr>
 			
-			<pre>{{display.bodytext | safe}}</pre>
+				<pre>{{display.bodytext | safe}}</pre>
 		</article>
 
-
-
-	
 
 {% endblock %}

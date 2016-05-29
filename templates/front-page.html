@@ -2,25 +2,29 @@
 
 {% block content %}
 		<div class="new_entry">
-			<a href="/blog/newpost">New Entry</a>
+			<a href="/blog/newpost"><b>New Entry</b></a>
 		</div>
 
+		<hr>
 
 
 	{% for entry in blogentries %}
 		<article>
-			<div class="post-header"> 
-				<a href="/blog/{{entry.objkey}}">
-					<span class="title">{{entry.title}}</span>
-					<span class="date">{{entry.date}}</span>
-				</a>
+			<div class="post-header">
+				<div class="title">
+					<a href="/blog/{{entry.objkey}}"><b>{{entry.title}}</b></a>, posted by <span class="author">Guillaume</span>
+	
+				</div>
 
-				
+				<div class="date">
+					{{entry.date}}
+				</div>
 			</div>
 
 			<hr>
 			
-			<pre>{{entry.bodytext | safe}}</pre>
+				<pre>{{entry.bodytext | safe}}</pre>
+			
 		</article>
 
 

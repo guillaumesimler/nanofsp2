@@ -1,3 +1,14 @@
+body {
+	font-family: "Calibri", sans-serif;
+
+	max-width: 1200px;
+	margin: 10px auto;
+}
+
+header {
+	text-align: center;
+}
+
 a {
 	text-decoration: none;
 	color: black;
@@ -7,22 +18,43 @@ p {
 	font-weight: bold;
 }
 
-.post-header{
+
+
+
+.new_entry{
+	text-align: center;
+	font-size: 18px;
 	min-height: 24px;
-}
+}	
 
 .text_area {
 	width: 400px;
 	height: 500px;
 }
 
-.title{
-	position: absolute;
-	left: 0px;
+
+
+
+/*Display of the text are a */
+.post-header {
+	display: flex;
+	display: -webkit-flex;
+	display: -moz-flex;
+}
+
+
+.title {
+	min-height: 24px;
+	width: 50%;
+}
+
+.author{
+	font-weight: bold;
+	color: blue;
 }
 
 .date {
-	position: absolute;
-	right: 0px;
 	text-align: right;
+	width: 50%;
 };
+
