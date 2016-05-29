@@ -27,10 +27,13 @@ class Handler(webapp2.RequestHandler):
 # Create the entity (Google Datastore's table)
 
 
-blogentries = [{"title": "A first Test", "bodytext": "A convincing first test", "date": "26.05.2016", "objkey" : 1}, 
-               {"title": "A second Test", "bodytext": "The confirmation", "date": "29.05.2016", "objkey" : 2}]
+class Blogentries(db.Model):
+    title = db.StringProperty(required = True)
+    bodytext = db.TextProperty(required = True)
+    contributor = db.StringProperty(required = True)
+    date = db.DateTimeProperty(auto_now_add = True)
+    modified = db.DateTimeProperty(auto_now = True)
 
- 
 
 # Main Classes
 
@@ -45,17 +48,16 @@ class NewPostHandler(Handler):
 
         title = self.request.get("title")
         bodytext = self.request.get("bodytext")
-
-        # to be simplified with the data base
-        objkey = len(blogentries) + 1
-        
-
+       
         if bodytext and title:
-            temp = {"title": title, "bodytext": bodytext, "date": "30.05.2016", "objkey": objkey}
+            b = Blogentries(title= title, bodytext=bodytext, contributor="Guillaume")
+            b.put()
 
-            blogentries.append(temp)
+            key = b.key().id()
 
-            self.redirect('/blog')
+
+
+            self.redirect('/blog/%s' %str(key))
         else:
             error = "Something went wrong. The title or the bodytext were not filled"
 
@@ -63,17 +65,14 @@ class NewPostHandler(Handler):
 
 
 class NewPostDisplay(Handler):
-    def get(self, key):
+    def get(self, keyid):
         
         # to be replaced
-        key = int(key)
+        key = db.Key.from_path('Blogentries', int(keyid))
+        display = db.get(key)
 
-        for entry in blogentries:
-            if entry["objkey"] == key:
-                display = entry             
-            
-            else:
-                self.error(404)
+        if not display:
+            self.error(404)
 
         # end of the replacement 
 
@@ -83,6 +82,8 @@ class NewPostDisplay(Handler):
 class MainPage(Handler):
 
     def get(self):
+        blogentries= db.GqlQuery("SELECT * FROM Blogentries ORDER BY date DESC LIMIT 10")
+
         self.render("front-page.html", blogentries = blogentries)
 
 

@@ -12,12 +12,13 @@
 		<article>
 			<div class="post-header">
 				<div class="title">
-					<a href="/blog/{{entry.objkey}}"><b>{{entry.title}}</b></a>, posted by <span class="author">Guillaume</span>
+					<a href="/blog/{{entry.objkey}}"><b>{{entry.title}}</b></a>, posted by <span class="contributor">Guillaume</span>
 	
 				</div>
 
 				<div class="date">
-					{{entry.date}}
+					{{entry.date.strftime("%B %d %Y") }}
+
 				</div>
 			</div>
 
