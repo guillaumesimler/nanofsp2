@@ -43,8 +43,6 @@ class Handler(webapp2.RequestHandler):
 # Create the entity (Google Datastore's table)
 # (for more info - please check the readme )
 
-
-class Blogentries(db.Model):
     title = db.StringProperty(required = True)
     bodytext = db.TextProperty(required = True)
     contributor = db.StringProperty(required = True)
@@ -55,6 +53,8 @@ class Blogentries(db.Model):
 # Main Classes
 
 class NewPostHandler(Handler):
+
+class Blogentries(db.Model):
     def render_newpost(self, title="", bodytext="", error=""):
         self.render("newpost.html", title = title, bodytext = bodytext, error = error)
 
@@ -72,9 +72,8 @@ class NewPostHandler(Handler):
 
             key = b.key().id()
 
+            self.redirect('/blog/%s' % str(key))
 
-
-            self.redirect('/blog/%s' %str(key))
         else:
             error = "Something went wrong. The title or the bodytext were not filled"
 
@@ -85,13 +84,13 @@ class NewPostDisplay(Handler):
     def get(self, keyid):
 
         key = db.Key.from_path('Blogentries', int(keyid))
-        display = db.get(key)
+        blogentry = db.get(key)
 
-        if not display:
+        if not blogentry:
             self.error(404)
 
 
-        self.render("single_entry.html", display = display)
+        self.render("single_entry.html", blogentry = blogentry)
 
 
 class MainPage(Handler):

@@ -1,22 +1,39 @@
+<!-- *** single_entry.html***
+
+	This template is quite simliar to the main template with the following exception:
+	there is only one value, hence
+		- blogentry instead of blogentries as variable
+		- the abscence of a for loop
+
+	This page doesn't allow the editing of the new page, so the anchor to the new post
+	template was kicked.
+ -->
+
+
+
 {% extends "page.html" %}
 
 {% block content %}
-	
+
 		<article>
 			<div class="post-header">
 				<div class="title">
-					<a href="/blog/{{display.key().id()}}"><b>{{display.title}}</b></a>, posted by <span class="author">Guillaume</span>
-	
+					<a href="/blog/{{blogentry.key().id()}}"><b>{{blogentry.title}}</b></a>,
+
+					{%if blogentry.contributor %}
+						posted by <span class="author">{{blogentry.contributor}}</span>
+					{% endif %}
+
 				</div>
 
 				<div class="date">
-					{{display.date.strftime("%B %d %Y") }}
+					{{blogentry.date.strftime("%B %d %Y") }}
 				</div>
 			</div>
 
 			<hr>
-			
-				<pre>{{display.bodytext | safe}}</pre>
+
+				<pre>{{blogentry.bodytext | safe}}</pre>
 		</article>
 
 

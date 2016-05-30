@@ -1,3 +1,6 @@
+
+
+
 {% extends "page.html" %}
 
 {% block content %}
@@ -12,8 +15,12 @@
 		<article>
 			<div class="post-header">
 				<div class="title">
-					<a href="/blog/{{entry.key().id()}}"><b>{{entry.title}}</b></a>, posted by <span class="contributor">Guillaume</span>
-	
+					<a href="/blog/{{entry.key().id()}}"><b>{{entry.title}}</b></a>,
+
+					{% if entry.contributor %}
+						posted by <span class="contributor">{{entry.contributor}}</span>
+					{% end if%}
+
 				</div>
 
 				<div class="date">
@@ -23,15 +30,15 @@
 			</div>
 
 			<hr>
-			
+
 				<pre>{{entry.bodytext | safe}}</pre>
-			
+
 		</article>
 
 
-	
+
 	{% endfor %}
 
-	
+
 
 {% endblock %}
