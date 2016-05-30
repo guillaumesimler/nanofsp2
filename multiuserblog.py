@@ -1,22 +1,38 @@
+# ----- Multi User Block -----
+#
+#  A Program by Guillaume Simler
+
+
+
+# Libraries:
+# jinja2 (templating lib), webapp2 (main GAE library) &
+# db (Datastore) are linked to Google App Engine (GAE)
+
+
 import os
 import jinja2
 import webapp2
 
 from google.appengine.ext import db
 
-# initialize Jinja
+# initialize Jinja:
+#   - it defines the folder to store the templates /templates/
+#   - loads the template(s) into Jinja2
+#   - automate the HTML escaping
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
-jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), 
+jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
                             autoescape= True)
 
 
 #Helper Class (reduce work in handler)
 
 class Handler(webapp2.RequestHandler):
+    # classic HTML write order from GAE
     def write(self, *a, **kw):
         self.response.out.write(*a, **kw)
 
+    # Load the templates
     def render_str(self, template, **params):
         t = jinja_env.get_template(template)
         return t.render(params)
@@ -25,6 +41,7 @@ class Handler(webapp2.RequestHandler):
         self.write(self.render_str(template, **kw))
 
 # Create the entity (Google Datastore's table)
+# (for more info - please check the readme )
 
 
 class Blogentries(db.Model):
@@ -48,7 +65,7 @@ class NewPostHandler(Handler):
 
         title = self.request.get("title")
         bodytext = self.request.get("bodytext")
-       
+
         if bodytext and title:
             b = Blogentries(title= title, bodytext=bodytext, contributor="Guillaume")
             b.put()
@@ -66,14 +83,14 @@ class NewPostHandler(Handler):
 
 class NewPostDisplay(Handler):
     def get(self, keyid):
-        
+
         key = db.Key.from_path('Blogentries', int(keyid))
         display = db.get(key)
 
         if not display:
             self.error(404)
 
-     
+
         self.render("single_entry.html", display = display)
 
 
@@ -92,5 +109,5 @@ app = webapp2.WSGIApplication([
                              ('/blog', MainPage),
                              ('/blog/newpost', NewPostHandler),
                              ('/blog/([0-9]+)', NewPostDisplay)
-                            ], 
+                            ],
 debug=True)
