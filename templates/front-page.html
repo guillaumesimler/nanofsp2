@@ -1,28 +1,46 @@
+<!-- *** front-page.html ***
 
+This is template generates the content of the front page via
+the MainPage handler (a GET request)
+
+This page has two main sections:
+	- the link to create a new post (a simple anchor tag to the newpost page)
+	- the content part which "loops in" the 10 latest post from the database
+-->
 
 
 {% extends "page.html" %}
 
 {% block content %}
+
+		<!-- The link to the new post  -->
 		<div class="new_entry">
 			<a href="/blog/newpost"><b>New Entry</b></a>
 		</div>
 
 		<hr>
 
-
+		<!-- The entry of the content -->
 	{% for entry in blogentries %}
 		<article>
 			<div class="post-header">
 				<div class="title">
+					<!-- This entry generates a dedicate anchor for each entry, which will trigger
+					the NeWPostDIsplay handlet and its page generation. -->
 					<a href="/blog/{{entry.key().id()}}"><b>{{entry.title}}</b></a>,
 
+
+					<!-- This if statement simply check whether there's a named contributor.
+							This might be overkill yet, but would allow to make the contribution
+							column optional (and not mandatory as such)
+					 -->
 					{% if entry.contributor %}
 						posted by <span class="contributor">{{entry.contributor}}</span>
 					{% end if%}
 
 				</div>
 
+					<!-- This adds amd format the date field -->
 				<div class="date">
 					{{entry.date.strftime("%B %d %Y") }}
 
@@ -30,7 +48,8 @@
 			</div>
 
 			<hr>
-
+					<!-- This field inserts the main text and allows "safe" html (overriding)
+					partially the escaping -->
 				<pre>{{entry.bodytext | safe}}</pre>
 
 		</article>
