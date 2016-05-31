@@ -43,6 +43,7 @@ class Handler(webapp2.RequestHandler):
 # Create the entity (Google Datastore's table)
 # (for more info - please check the readme )
 
+class Blogentries(db.Model):
     title = db.StringProperty(required = True)
     bodytext = db.TextProperty(required = True)
     contributor = db.StringProperty(required = True)
@@ -53,8 +54,6 @@ class Handler(webapp2.RequestHandler):
 # Main Classes
 
 class NewPostHandler(Handler):
-
-class Blogentries(db.Model):
     def render_newpost(self, title="", bodytext="", error=""):
         self.render("newpost.html", title = title, bodytext = bodytext, error = error)
 
