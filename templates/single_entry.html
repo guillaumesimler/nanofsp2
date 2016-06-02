@@ -6,17 +6,17 @@
 {% block content %}
 
 		<article>
-			<div class="post-header">
+			<div class="post_header">
 				<div class="title">
 					<a href="/blog/{{blogentry.key().id()}}"><b>{{blogentry.title}}</b></a>,
 
 					{%if blogentry.contributor %}
-						posted by <span class="author">{{blogentry.contributor}}</span>
+						posted by <span class="post_author">{{blogentry.contributor}}</span>
 					{% endif %}
 
 				</div>
 
-				<div class="date">
+				<div class="post_date">
 					{{blogentry.date.strftime("%B %d %Y") }}
 				</div>
 			</div>

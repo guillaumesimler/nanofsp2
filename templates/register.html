@@ -1,0 +1,69 @@
+{% extends "page.html" %}
+
+{% block content %}
+
+	<div class="welcome">
+		<h2>Welcome on the user registration form for this blog</h2>
+
+		<p>You ought to know the drill: 
+			<ul>
+				<li>no blank spaces</li>
+				<li>password must have more than 6 characters</li>
+			</ul>
+		</p>
+	</div>
+
+	<form method="post">
+		<label class="register_header">
+			<div class="register_text">Your Username: </div>
+			<input class="register_input" type="text" name="value">
+			<div class="register_error"></div>
+		</label class="register_header">
+
+		<br>
+
+		<label class="register_header">
+			<div class="register_text">Your password:</div>
+			<input class="register_input" type="password" name="fir_password">
+			<div class="register_error"></div>
+		</label class="register_header">
+
+		<br>
+
+		<label class="register_header">
+			<div class="register_text">Confirm your password:</div>
+			<input class="register_input" type="password" name="sec_password">
+			<div class="register_error"></div>
+		</label class="register_header">
+
+		<br>
+
+		<label class="register_header">
+			<div class="register_text">Your email (optional):</div>
+			<input class="register_input" type="text" name="value">
+			<div class="register_error"></div>
+		</label class="register_header">
+		
+		<br>
+
+		<p>
+			<input type="submit">
+		</p>
+	
+		<!-- A needed extention for following websites as I am German resident -->
+
+		<p>The website is strictly for private use in accordance to German Law (§5 TMG & §55 RstV).
+			<br>
+
+			It uses cookies. Please make sure you
+			<ol>
+				<li>understand this terms</li>
+				<li>enable your browser to use them</li>
+			</ol>
+
+			<input  type="checkbox" name="disclaimer"> I understand & accept the terms
+		</p>
+
+	</form>
+
+{% endblock %}

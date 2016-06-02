@@ -92,6 +92,13 @@ class NewPostDisplay(Handler):
         self.render("single_entry.html", blogentry = blogentry)
 
 
+class RegisterPage(Handler):
+    
+    def get(self):
+        self.render("register.html")
+        
+
+
 class MainPage(Handler):
 
     def get(self):
@@ -106,6 +113,7 @@ class MainPage(Handler):
 app = webapp2.WSGIApplication([
                              ('/blog', MainPage),
                              ('/blog/newpost', NewPostHandler),
-                             ('/blog/([0-9]+)', NewPostDisplay)
+                             ('/blog/([0-9]+)', NewPostDisplay),
+                             ('/blog/register', RegisterPage)
                             ],
 debug=True)

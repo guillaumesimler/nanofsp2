@@ -1,3 +1,6 @@
+/*Structures general aspects. Relevance:
+- all templates*/
+
 body {
 	font-family: "Calibri", sans-serif;
 
@@ -19,9 +22,12 @@ p {
 }
 
 
+/*Structures the entry form. Relevance for:
+- newpost.html
 
+*/
 
-.new_entry{
+.new_entry {
 	text-align: center;
 	font-size: 18px;
 	min-height: 24px;
@@ -33,28 +39,54 @@ p {
 }
 
 
+/*Display of the text area. Relevance for:
+- single_entry.html 
+- front-page.html
+*/
 
-
-/*Display of the text are a */
-.post-header {
+.post_header {
 	display: flex;
 	display: -webkit-flex;
 	display: -moz-flex;
 }
 
 
-.title {
+.post_title {
 	min-height: 24px;
 	width: 50%;
 }
 
-.contributor{
+.post_contributor{
 	font-weight: bold;
 	color: blue;
 }
 
-.date {
+.post_date {
 	text-align: right;
 	width: 50%;
 };
 
+
+
+/* Display the register form. Relevance for:
+- register.html 
+ */
+
+.register_header {
+	display: flex;
+	display: -webkit-flex;
+	display: -moz-flex;
+}
+
+.register_text {
+	width: 20%;
+}
+
+
+.register_input {
+	width: 20%;
+}
+
+.register_error {
+	width: 60%;
+}

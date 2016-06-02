@@ -23,8 +23,8 @@ This page has two main sections:
 		<!-- The entry of the content -->
 	{% for entry in blogentries %}
 		<article>
-			<div class="post-header">
-				<div class="title">
+			<div class="post_header">
+				<div class="post_title">
 					<!-- This entry generates a dedicate anchor for each entry, which will trigger
 					the NeWPostDIsplay handlet and its page generation. -->
 					<a href="/blog/{{entry.key().id()}}"><b>{{entry.title}}</b></a>,
@@ -35,13 +35,13 @@ This page has two main sections:
 							column optional (and not mandatory as such)
 					 -->
 					{% if entry.contributor %}
-						posted by <span class="contributor">{{entry.contributor}}</span>
+						posted by <span class="post_contributor">{{entry.contributor}}</span>
 					{% endif %}
 
 				</div>
 
 					<!-- This adds amd format the date field -->
-				<div class="date">
+				<div class="post_date">
 					{{entry.date.strftime("%B %d %Y") }}
 
 				</div>
