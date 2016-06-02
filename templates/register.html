@@ -16,8 +16,8 @@
 	<form method="post">
 		<label class="register_header">
 			<div class="register_text">Your Username: </div>
-			<input class="register_input" type="text" name="value">
-			<div class="register_error"></div>
+			<input class="register_input" type="text" name="username" value="{{values[0]}}">
+			<div class="register_error">{{errors[0]}}</div>
 		</label class="register_header">
 
 		<br>
@@ -25,7 +25,7 @@
 		<label class="register_header">
 			<div class="register_text">Your password:</div>
 			<input class="register_input" type="password" name="fir_password">
-			<div class="register_error"></div>
+			<div class="register_error">{{errors[1]}}</div>
 		</label class="register_header">
 
 		<br>
@@ -33,15 +33,15 @@
 		<label class="register_header">
 			<div class="register_text">Confirm your password:</div>
 			<input class="register_input" type="password" name="sec_password">
-			<div class="register_error"></div>
+			<div class="register_error">{{errors[2]}}</div>
 		</label class="register_header">
 
 		<br>
 
 		<label class="register_header">
 			<div class="register_text">Your email (optional):</div>
-			<input class="register_input" type="text" name="value">
-			<div class="register_error"></div>
+			<input class="register_input" type="text" name="email" value="{{values[3]}}">
+			<div class="register_error">{{errors[3]}}</div>
 		</label class="register_header">
 		
 		<br>
@@ -61,7 +61,9 @@
 				<li>enable your browser to use them</li>
 			</ol>
 
-			<input  type="checkbox" name="disclaimer"> I understand & accept the terms
+			<input type="checkbox" name="disclaimer"> I understand & accept the terms. 
+			<span class ="register_error">{{ errors[-1] }}</span>
+
 		</p>
 
 	</form>

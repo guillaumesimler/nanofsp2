@@ -12,6 +12,7 @@
 import os
 import jinja2
 import webapp2
+import re
 
 from google.appengine.ext import db
 
@@ -93,11 +94,92 @@ class NewPostDisplay(Handler):
 
 
 class RegisterPage(Handler):
+
     
     def get(self):
-        self.render("register.html")
-        
+        self.render("register.html", errors = '', values= '')
 
+    def post(self):
+        username = self.request.get('username')
+        fir_password = self.request.get('fir_password')
+        sec_password = self.request.get('sec_password')
+        email = self.request.get('email')
+        disclaimer = self.request.get('disclaimer')
+
+        values = [username,
+                  '',
+                  '',
+                  email]       
+        
+        error_username = ''
+        error_fir_password =  ''
+        error_sec_password = ''
+        error_email = ''
+        error_disclaimer = ''
+
+        errors = []
+        
+        mover = True
+
+
+        # check user name 
+
+        user_re = re.compile(r"^[a-zA-Z0-9_-]{6,20}$")
+
+        if not user_re.match(username):
+            error_username = 'The username does not fit the requirements'
+
+        errors.append(error_username)
+
+
+
+        # check first password
+        fir_re = re.compile(r"^.{6,20}$")
+
+        if not fir_re.match(fir_password):
+            error_fir_password = "Your password is invalid"
+            mover = False
+
+        errors.append(error_fir_password)
+
+        # check password match
+
+        if not fir_password or not sec_password or fir_password != sec_password:
+            error_sec_password = "Your passwords don't match"
+            mover = False
+
+        errors.append(error_sec_password)
+
+        # check email
+
+        email_re = re.compile(r"^[\S]+@[\S]+.[\S]+$")
+        
+        if not email_re.match(email):
+            error_email = "are you sure it is an email?"
+            mover = False
+
+        errors.append(error_email)
+
+        # check disclaimer
+        if disclaimer != 'on':
+            error_disclaimer = 'Please accept the conditions to access the blog'
+            mover = False
+            
+        errors.append(error_disclaimer)
+
+        if mover:
+            self.redirect('/blog/welcome?username=' + username)
+        else:    
+            self.render("register.html", errors = errors, values = values) 
+
+
+class Welcome(Handler):
+
+    def get(self):
+
+        username = self.request.get('username')
+
+        self.write('<h1> Hello, ' + username + '</h1>')
 
 class MainPage(Handler):
 
@@ -114,6 +196,7 @@ app = webapp2.WSGIApplication([
                              ('/blog', MainPage),
                              ('/blog/newpost', NewPostHandler),
                              ('/blog/([0-9]+)', NewPostDisplay),
-                             ('/blog/register', RegisterPage)
+                             ('/blog/register', RegisterPage),
+                             ('/blog/welcome', Welcome)
                             ],
 debug=True)

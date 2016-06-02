@@ -89,4 +89,6 @@ p {
 
 .register_error {
 	width: 60%;
+	color: red;
+	font-weight: bold;
 }
