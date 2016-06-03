@@ -13,6 +13,7 @@ import os
 import jinja2
 import webapp2
 import re
+import security
 
 from google.appengine.ext import db
 
@@ -50,6 +51,20 @@ class Blogentries(db.Model):
     contributor = db.StringProperty(required = True)
     date = db.DateTimeProperty(auto_now_add = True)
     modified = db.DateTimeProperty(auto_now = True)
+
+
+class UserData(db.Model):
+    Username = db.StringProperty(required = True)
+    hPassword = db.StringProperty(required = True)
+    Email = db.StringProperty()
+
+    @classmethod
+    def by_id(self, uid):
+        return UserData.get_by_id(uid)
+
+    @classmethod
+    def by_name(self, name):
+        return UserData.all().filter('name =', name).get()
 
 
 # Main Classes
@@ -93,6 +108,50 @@ class NewPostDisplay(Handler):
         self.render("single_entry.html", blogentry = blogentry)
 
 
+# Helper function for  register
+
+def check_user(username, error_message = ''):
+    user_re = re.compile(r"^[a-zA-Z0-9_-]{6,20}$")
+
+    if not user_re.match(username):
+        error_message = 'The username does not fit the requirements'
+
+    if UserData.by_name(username):
+            error_message = 'This username is already used'
+
+    return error_message
+
+def check_fir_pass(fir_password, error_message = ''):
+    fir_re = re.compile(r"^.{6,20}$")
+
+    if not fir_re.match(fir_password):
+        error_message = "Your password is invalid"
+
+    return error_message
+
+def check_sec_pass(fir_password, sec_password, error_message=''):
+    if not fir_password or not sec_password or fir_password != sec_password:
+        error_message = "Your passwords don't match"
+
+    return error_message
+
+def check_email(email, error_message=''):
+    email_re = re.compile(r"^[\S]+@[\S]+.[\S]+$")
+
+    if email and not email_re.match(email):
+        error_message = "are you sure it is an email?"
+
+    return error_message
+
+
+def check_disclaimer(disclaimer, error_message=''):
+    if disclaimer != 'on':
+        error_message = 'Please accept the conditions to access the blog'
+
+    return error_message
+
+# RegisterPage
+
 class RegisterPage(Handler):
 
     
@@ -110,67 +169,34 @@ class RegisterPage(Handler):
                   '',
                   '',
                   email]       
-        
-        error_username = ''
-        error_fir_password =  ''
-        error_sec_password = ''
-        error_email = ''
-        error_disclaimer = ''
 
-        errors = []
-        
+        # Run the checks and append the results to the list
+        errors = [check_user(username),
+                  check_fir_pass(fir_password),
+                  check_sec_pass(fir_password, sec_password),
+                  check_email(email),
+                  check_disclaimer(disclaimer)]
+
+
+        # Check for errors: if yes, at least one error won't be ''
         mover = True
 
+        for error in errors:
+            if error != '':
+                mover = False
 
-        # check user name 
+       # implement the input
 
-        user_re = re.compile(r"^[a-zA-Z0-9_-]{6,20}$")
-
-        if not user_re.match(username):
-            error_username = 'The username does not fit the requirements'
-
-        errors.append(error_username)
-
-
-
-        # check first password
-        fir_re = re.compile(r"^.{6,20}$")
-
-        if not fir_re.match(fir_password):
-            error_fir_password = "Your password is invalid"
-            mover = False
-
-        errors.append(error_fir_password)
-
-        # check password match
-
-        if not fir_password or not sec_password or fir_password != sec_password:
-            error_sec_password = "Your passwords don't match"
-            mover = False
-
-        errors.append(error_sec_password)
-
-        # check email
-
-        email_re = re.compile(r"^[\S]+@[\S]+.[\S]+$")
-        
-        if not email_re.match(email):
-            error_email = "are you sure it is an email?"
-            mover = False
-
-        errors.append(error_email)
-
-        # check disclaimer
-        if disclaimer != 'on':
-            error_disclaimer = 'Please accept the conditions to access the blog'
-            mover = False
-            
-        errors.append(error_disclaimer)
 
         if mover:
+            hPassword = security.make_pw_hash(username, fir_password)
+            a = UserData(Username= username, hPassword = hPassword, Email = email)
+            a.put()
+            
             self.redirect('/blog/welcome?username=' + username)
         else:    
-            self.render("register.html", errors = errors, values = values) 
+            self.render("register.html", errors = errors, values = values, db=dab) 
+
 
 
 class Welcome(Handler):
