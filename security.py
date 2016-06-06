@@ -6,7 +6,7 @@ import hmac
 
 # Cookie encoding
 
-codeword = "qd8qfee5mtu"
+codeword = "qd8qfem2eq4r52+tu"
 
 def hash_cookie(id):
     return hmac.new(codeword, id).hexdigest()
@@ -36,7 +36,7 @@ def make_pw_hash(name, pw, salt = None):
 
     return '%s|%s' %(h, salt)
 
-def valid_pw(name, pw, h):
+def check_pw(name, pw, h):
 
     salt = h.split('|')[1]
     return h == make_pw_hash(name, pw, salt)

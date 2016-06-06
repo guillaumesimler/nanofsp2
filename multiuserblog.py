@@ -117,7 +117,6 @@ def check_user(username, error_message = ''):
     if not user_re.match(username):
         error_message = 'The username does not fit the requirements'
 
-
     k = UserData.by_name(username)
     
     if k:
@@ -206,12 +205,11 @@ class RegisterPage(Handler):
             new_cookie = security.encode_cookie(key)
 
 
-            self.response.headers.add_header('Set-Cookie', 'id=%s' % new_cookie)
+            self.response.headers.add_header('Set-Cookie', 'id=%s; Path=/' % new_cookie)
             
             self.redirect('/blog/welcome')
         else:    
             self.render("10_register.html", errors = errors, values = values) 
-
 
 
 class Welcome(Handler):
@@ -231,6 +229,34 @@ class Welcome(Handler):
         else:
             self.write('<h1>Bug</h1>')
 
+
+class Login(Handler):
+
+    def get(self):
+        self.render("11_login.html", error='')
+
+    def post(self):
+
+        username = self.request.get("username")
+        password = self.request.get("password")
+
+        check_name = UserData.by_name(username)[0]
+        
+        if check_name and security.check_pw(username, password, check_name.hPassword):
+            key = str(check_name.key().id())
+            new_cookie = security.encode_cookie(key)
+
+            self.response.headers.add_header('Set-Cookie', 'id=%s; Path=/' % new_cookie)
+
+            self.redirect('/blog/welcome')
+        else:
+            self.render("11_login.html", error = 'no valid username or password')
+
+
+        
+
+
+
 class MainPage(Handler):
 
     def get(self):
@@ -238,6 +264,8 @@ class MainPage(Handler):
 
         self.render("02_front-page.html", blogentries = blogentries)
 
+
+# --------------------------------    Debug Section        ---------------------------------
 # helper functions to debug
 
 def cleanupDb(key):
@@ -255,11 +283,11 @@ class Debug(Handler):
 
         # db content
 
-
         k2 = db.GqlQuery("SELECT * FROM UserData ORDER BY Username")
 
         self.render('99_debug.html', k1= k1, k2= k2)
 
+# ------------------------------------------------------------------------------------------
 
 # Function triggering the page generation
 app = webapp2.WSGIApplication([
@@ -267,7 +295,10 @@ app = webapp2.WSGIApplication([
                              ('/blog/newpost', NewPostHandler),
                              ('/blog/([0-9]+)', NewPostDisplay),
                              ('/blog/register', RegisterPage),
+                             ('/blog/login', Login),
                              ('/blog/welcome', Welcome),
                              ('/blog/debug', Debug)
                             ],
 debug=True)
+
+

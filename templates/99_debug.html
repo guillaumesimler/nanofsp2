@@ -8,7 +8,7 @@
 
 <ol>
 {% for l in k1 %}
-	<li>{{l.Username}} , {{l.hPassword}} , {{l.Email}} . {{l.key().id()}} </li>
+	<li>{{l.Username}}, {{l.hPassword}}, {{l.Email}}, {{l.key().id()}} </li>
 
 {% endfor %}
 </ol>
@@ -37,14 +37,17 @@ Last version, <b>k = UserData.all().filter('Username =', name).fetch(1)</b>, see
 {% if k2 %}
 <ol>
 	{% for l in k2 %}
-		<li>{{l.Username}} , {{l.hPassword}} , {{l.Email}} . {{l.key().id()}} </li>
+		<li>{{l.Username}}, {{l.hPassword}}, {{l.Email}}, {{l.key().id()}} </li>
 
 	{% endfor %}
 
 </ol>
 {% else %}
 <p>the db is empty</p>
-
 {% endif %}
+
+<h2>3. Getting data out by name</h2>
+
+<p>solved by indexing [0]</p>
 
 {% endblock %}
