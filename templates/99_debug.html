@@ -1,3 +1,7 @@
+{% extends "01_pageheader.html" %}
+
+{% block content %}
+
 <h1>Debuging page: reports & solutions</h1>
 
 <h2>1. Allowing double entries of logins</h2>
@@ -17,7 +21,7 @@
 	<li><b style="color:red">did not work</b>:k = UserData.by_name('Werther')</li>
 	<li><b style="color:red">did not work</b>:k = UserData.all().filter('name =', name).get()</li>
 	<li><b style="color:green">worked</b>: k = db.GqlQuery("SELECT * FROM UserData WHERE Username = 'Werther')</li>
-	<li><b style="color:red">did not work</b>: name = 'Werther' <br> k = db.GqlQuery("SELECT * FROM UserData WHERE Username = " + name)<</li>
+	<li><b style="color:red">did not work</b>: name = 'Werther' <br> k = db.GqlQuery("SELECT * FROM UserData WHERE Username = " + name)</li>
 	<li><b style="color:red">did not work</b>:k = UserData.all().filter('Username =', name).get()</li>
 	<li><b style="color:green">worked</b>:name = 'Werther' <br>
         k = UserData.all().filter('Username =', name).fetch(1)</li>
@@ -26,3 +30,5 @@
 Last version, <b>k = UserData.all().filter('Username =', name).fetch(1)</b>, seems to be more suitable to be used. See <a href="https://cloud.google.com/appengine/docs/python/ndb/db_to_ndb#queries">DB & NDB docu</a>
 
 </p>
+
+{% endblock %}

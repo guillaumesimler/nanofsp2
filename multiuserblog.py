@@ -71,7 +71,7 @@ class UserData(db.Model):
 
 class NewPostHandler(Handler):
     def render_newpost(self, title="", bodytext="", error=""):
-        self.render("newpost.html", title = title, bodytext = bodytext, error = error)
+        self.render("04_newpost.html", title = title, bodytext = bodytext, error = error)
 
     def get(self):
         self.render_newpost()
@@ -105,7 +105,7 @@ class NewPostDisplay(Handler):
             self.error(404)
 
 
-        self.render("single_entry.html", blogentry = blogentry)
+        self.render("03_single_entry.html", blogentry = blogentry)
 
 
 # Helper function for  register
@@ -159,7 +159,7 @@ class RegisterPage(Handler):
 
     
     def get(self):
-        self.render("register.html", errors = '', values= '')
+        self.render("10_register.html", errors = '', values= '')
 
     def post(self):
         username = self.request.get('username')
@@ -198,7 +198,7 @@ class RegisterPage(Handler):
             
             self.redirect('/blog/welcome?username=' + username)
         else:    
-            self.render("register.html", errors = errors, values = values) 
+            self.render("10_register.html", errors = errors, values = values) 
 
 
 
@@ -215,7 +215,7 @@ class MainPage(Handler):
     def get(self):
         blogentries= db.GqlQuery("SELECT * FROM Blogentries ORDER BY date DESC LIMIT 10")
 
-        self.render("front-page.html", blogentries = blogentries)
+        self.render("02_front-page.html", blogentries = blogentries)
 
 class Debug(Handler):
 
@@ -235,6 +235,6 @@ app = webapp2.WSGIApplication([
                              ('/blog/([0-9]+)', NewPostDisplay),
                              ('/blog/register', RegisterPage),
                              ('/blog/welcome', Welcome),
-                             ('/debug', Debug)
+                             ('/blog/debug', Debug)
                             ],
 debug=True)

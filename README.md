@@ -58,6 +58,13 @@ How to use
 
 * launch the following [webpage](**fresh_tomatoes.html**)
 
+Bugs
+----
+
+Bugs can be reported on the [Github section](https://github.com/guillaumesimler/nanofsp2/issues)
+
+They will be discussed there or on "blog/debug"
+
 
 Repository
 ----
