@@ -64,7 +64,7 @@ class UserData(db.Model):
 
     @classmethod
     def by_name(self, name):
-        k = UserData.all().filter('name =', name).get()
+        k = UserData.all().filter('Username =', name).fetch(1)
         return k
 
 # Main Classes
@@ -120,7 +120,7 @@ def check_user(username, error_message = ''):
     k = UserData.by_name(username)
     
     if k:
-            error_message = 'This username is already used'
+        error_message = 'This username is already used'
 
     return error_message
 
@@ -220,9 +220,12 @@ class MainPage(Handler):
 class Debug(Handler):
 
     def get(self):
-        k =  db.GqlQuery("SELECT * FROM UserData ORDER BY Username")
+      
+        name = 'Werther'
 
-        self.render('debug.html', k= k)
+        k = UserData.all().filter('Username =', name).fetch(1)
+
+        self.render('99_debug.html', k= k)
 
 
 # Function triggering the page generation
