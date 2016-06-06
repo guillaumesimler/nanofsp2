@@ -64,8 +64,8 @@ class UserData(db.Model):
 
     @classmethod
     def by_name(self, name):
-        return UserData.all().filter('name =', name).get()
-
+        k = UserData.all().filter('name =', name).get()
+        return k
 
 # Main Classes
 
@@ -116,7 +116,10 @@ def check_user(username, error_message = ''):
     if not user_re.match(username):
         error_message = 'The username does not fit the requirements'
 
-    if UserData.by_name(username):
+
+    k = UserData.by_name(username)
+    
+    if k:
             error_message = 'This username is already used'
 
     return error_message
@@ -195,7 +198,7 @@ class RegisterPage(Handler):
             
             self.redirect('/blog/welcome?username=' + username)
         else:    
-            self.render("register.html", errors = errors, values = values, db=dab) 
+            self.render("register.html", errors = errors, values = values) 
 
 
 
@@ -214,7 +217,12 @@ class MainPage(Handler):
 
         self.render("front-page.html", blogentries = blogentries)
 
+class Debug(Handler):
 
+    def get(self):
+        k =  db.GqlQuery("SELECT * FROM UserData ORDER BY Username")
+
+        self.render('debug.html', k= k)
 
 
 # Function triggering the page generation
@@ -223,6 +231,7 @@ app = webapp2.WSGIApplication([
                              ('/blog/newpost', NewPostHandler),
                              ('/blog/([0-9]+)', NewPostDisplay),
                              ('/blog/register', RegisterPage),
-                             ('/blog/welcome', Welcome)
+                             ('/blog/welcome', Welcome),
+                             ('/debug', Debug)
                             ],
 debug=True)
