@@ -7,8 +7,8 @@
 <h2>1. Allowing double entries of logins</h2>
 
 <ol>
-{% for l in k %}
-	<li>{{l.Username}} , {{l.hPassword}} , {{l.Email}} </li>
+{% for l in k1 %}
+	<li>{{l.Username}} , {{l.hPassword}} , {{l.Email}} . {{l.key().id()}} </li>
 
 {% endfor %}
 </ol>
@@ -18,8 +18,8 @@
 
 <ol>
 	<li><b style="color:green">worked</b>: k = db.GqlQuery("SELECT * FROM UserData ORDER BY Username")</li>
-	<li><b style="color:red">did not work</b>:k = UserData.by_name('Werther')</li>
-	<li><b style="color:red">did not work</b>:k = UserData.all().filter('name =', name).get()</li>
+	<li><b style="color:red">did not work</b>: k = UserData.by_name('Werther')</li>
+	<li><b style="color:red">did not work</b>: k = UserData.all().filter('name =', name).get()</li>
 	<li><b style="color:green">worked</b>: k = db.GqlQuery("SELECT * FROM UserData WHERE Username = 'Werther')</li>
 	<li><b style="color:red">did not work</b>: name = 'Werther' <br> k = db.GqlQuery("SELECT * FROM UserData WHERE Username = " + name)</li>
 	<li><b style="color:red">did not work</b>:k = UserData.all().filter('Username =', name).get()</li>
@@ -30,5 +30,21 @@
 Last version, <b>k = UserData.all().filter('Username =', name).fetch(1)</b>, seems to be more suitable to be used. See <a href="https://cloud.google.com/appengine/docs/python/ndb/db_to_ndb#queries">DB & NDB docu</a>
 
 </p>
+
+
+
+<h2>2. Check db consistency</h2>
+{% if k2 %}
+<ol>
+	{% for l in k2 %}
+		<li>{{l.Username}} , {{l.hPassword}} , {{l.Email}} . {{l.key().id()}} </li>
+
+	{% endfor %}
+
+</ol>
+{% else %}
+<p>the db is empty</p>
+
+{% endif %}
 
 {% endblock %}

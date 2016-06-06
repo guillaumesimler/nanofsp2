@@ -15,6 +15,7 @@ import webapp2
 import re
 import security
 
+
 from google.appengine.ext import db
 
 # initialize Jinja:
@@ -192,11 +193,22 @@ class RegisterPage(Handler):
 
 
         if mover:
+
+            # create the password
             hPassword = security.make_pw_hash(username, fir_password)
+            
+            # create the database entry
             a = UserData(Username= username, hPassword = hPassword, Email = email)
             a.put()
+
+            # encode the cookie
+            key = str(a.key().id())
+            new_cookie = security.encode_cookie(key)
+
+
+            self.response.headers.add_header('Set-Cookie', 'id=%s' % new_cookie)
             
-            self.redirect('/blog/welcome?username=' + username)
+            self.redirect('/blog/welcome')
         else:    
             self.render("10_register.html", errors = errors, values = values) 
 
@@ -206,9 +218,18 @@ class Welcome(Handler):
 
     def get(self):
 
-        username = self.request.get('username')
+        cookie = self.request.cookies.get('id')
+        
 
-        self.write('<h1> Hello, ' + username + '</h1>')
+        if security.check_cookie(cookie):
+            cookie = int(cookie.split('|')[0])
+
+            username = UserData.get_by_id(cookie)
+
+            self.write('<h1> Hello, ' + username.Username + '</h1>')
+
+        else:
+            self.write('<h1>Bug</h1>')
 
 class MainPage(Handler):
 
@@ -217,15 +238,27 @@ class MainPage(Handler):
 
         self.render("02_front-page.html", blogentries = blogentries)
 
+# helper functions to debug
+
+def cleanupDb(key):
+    k = UserData.delete(UserData.get_by_id(key))
+
+
 class Debug(Handler):
 
     def get(self):
       
+        # first checkS
         name = 'Werther'
 
-        k = UserData.all().filter('Username =', name).fetch(1)
+        k1 = UserData.all().filter('Username =', name).fetch(10)
 
-        self.render('99_debug.html', k= k)
+        # db content
+
+
+        k2 = db.GqlQuery("SELECT * FROM UserData ORDER BY Username")
+
+        self.render('99_debug.html', k1= k1, k2= k2)
 
 
 # Function triggering the page generation
