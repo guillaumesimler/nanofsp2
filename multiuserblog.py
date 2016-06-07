@@ -30,8 +30,11 @@ jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
 
 #Helper Class (reduce work in handler)
 
+
+# classic HTML write order from GAE
+
 class Handler(webapp2.RequestHandler):
-    # classic HTML write order from GAE
+    
     def write(self, *a, **kw):
         self.response.out.write(*a, **kw)
 
@@ -42,6 +45,15 @@ class Handler(webapp2.RequestHandler):
 
     def render(self, template, **kw):
         self.write(self.render_str(template, **kw))
+
+    # ------- Personal Addition: cookie validation -------
+    def checkcookie(self):
+        cookie = self.request.cookies.get('id')
+        
+        if not cookie or not security.check_cookie(cookie):
+            self.redirect('/blog/login')
+
+
 
 # Create the entity (Google Datastore's table)
 # (for more info - please check the readme )
@@ -70,11 +82,14 @@ class UserData(db.Model):
 
 # Main Classes
 
+# --------------------------------    Page display Section        ---------------------------------
+
 class NewPostHandler(Handler):
     def render_newpost(self, title="", bodytext="", error=""):
         self.render("04_newpost.html", title = title, bodytext = bodytext, error = error)
 
     def get(self):
+        self.checkcookie()
         self.render_newpost()
 
     def post(self):
@@ -96,8 +111,9 @@ class NewPostHandler(Handler):
             self.render_newpost(title, bodytext, error)
 
 
-class NewPostDisplay(Handler):
+class SinglePostDisplay(Handler):
     def get(self, keyid):
+        self.checkcookie()
 
         key = db.Key.from_path('Blogentries', int(keyid))
         blogentry = db.get(key)
@@ -109,7 +125,22 @@ class NewPostDisplay(Handler):
         self.render("03_single_entry.html", blogentry = blogentry)
 
 
-# Helper function for  register
+
+class MainPage(Handler):
+
+    def get(self):
+        self.checkcookie()
+
+        blogentries= db.GqlQuery("SELECT * FROM Blogentries ORDER BY date DESC LIMIT 10")
+
+        self.render("02_front-page.html", blogentries = blogentries)
+
+
+# --------------------------------    Login & register Section        ---------------------------------
+
+
+
+# Helper function for register
 
 def check_user(username, error_message = ''):
     user_re = re.compile(r"^[a-zA-Z0-9_-]{6,20}$")
@@ -212,23 +243,6 @@ class RegisterPage(Handler):
             self.render("10_register.html", errors = errors, values = values) 
 
 
-class Welcome(Handler):
-
-    def get(self):
-
-        cookie = self.request.cookies.get('id')
-        
-
-        if security.check_cookie(cookie):
-            cookie = int(cookie.split('|')[0])
-
-            username = UserData.get_by_id(cookie)
-
-            self.write('<h1> Hello, ' + username.Username + '</h1>')
-
-        else:
-            self.write('<h1>Bug</h1>')
-
 
 class Login(Handler):
 
@@ -248,22 +262,29 @@ class Login(Handler):
 
             self.response.headers.add_header('Set-Cookie', 'id=%s; Path=/' % new_cookie)
 
-            self.redirect('/blog/welcome')
+            self.redirect('/blog')
         else:
             self.render("11_login.html", error = 'no valid username or password')
 
 
-        
+# --------------------------------    Legacy Section        ---------------------------------
 
-
-
-class MainPage(Handler):
+class Welcome(Handler):
 
     def get(self):
-        blogentries= db.GqlQuery("SELECT * FROM Blogentries ORDER BY date DESC LIMIT 10")
 
-        self.render("02_front-page.html", blogentries = blogentries)
+        cookie = self.request.cookies.get('id')
+        
 
+        if security.check_cookie(cookie):
+            cookie = int(cookie.split('|')[0])
+
+            username = UserData.get_by_id(cookie)
+
+            self.write('<h1> Hello, ' + username.Username + '</h1>')
+
+        else:
+            self.write('<h1>Bug</h1>')
 
 # --------------------------------    Debug Section        ---------------------------------
 # helper functions to debug
@@ -293,7 +314,7 @@ class Debug(Handler):
 app = webapp2.WSGIApplication([
                              ('/blog', MainPage),
                              ('/blog/newpost', NewPostHandler),
-                             ('/blog/([0-9]+)', NewPostDisplay),
+                             ('/blog/([0-9]+)', SinglePostDisplay),
                              ('/blog/register', RegisterPage),
                              ('/blog/login', Login),
                              ('/blog/welcome', Welcome),
