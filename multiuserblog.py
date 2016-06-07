@@ -60,6 +60,16 @@ class Handler(webapp2.RequestHandler):
             q = "Please log in"
             self.redirect('/blog/login?q=' + q)
 
+    def get_user(self):
+        cookie = self.request.cookies.get('id')
+        
+        if cookie and security.check_cookie(cookie):
+            cookie = int(cookie.split('|')[0])
+
+            username = UserData.get_by_id(cookie).Username
+
+        return username
+
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # !!!!!!!!!!!!!!!!! DataStore Classes !!!!!!!!!!!!!!!!!
@@ -90,13 +100,14 @@ class UserData(db.Model):
         k = UserData.all().filter('Username =', name).fetch(1)
         return k
 
+
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # !!!!!!!!!!!!!!!!!!!! Main Classes !!!!!!!!!!!!!!!!!!!!
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 # --------------------   Page display Section        --------------------
 
-class NewPostHandler(Handler):
+class NewPost(Handler):
     def render_newpost(self, title="", bodytext="", error=""):
         self.render("04_newpost.html", title = title, bodytext = bodytext, error = error)
 
@@ -109,8 +120,10 @@ class NewPostHandler(Handler):
         title = self.request.get("title")
         bodytext = self.request.get("bodytext")
 
+        username = self.get_user()
+
         if bodytext and title:
-            b = Blogentries(title= title, bodytext=bodytext, contributor="Guillaume")
+            b = Blogentries(title= title, bodytext=bodytext, contributor=username)
             b.put()
 
             key = b.key().id()
@@ -123,9 +136,12 @@ class NewPostHandler(Handler):
             self.render_newpost(title, bodytext, error)
 
 
-class SinglePostDisplay(Handler):
+class SinglePost(Handler):
     def get(self, keyid):
+        
         self.checkcookie()
+
+        username = self.get_user()
 
         key = db.Key.from_path('Blogentries', int(keyid))
         blogentry = db.get(key)
@@ -133,8 +149,7 @@ class SinglePostDisplay(Handler):
         if not blogentry:
             self.error(404)
 
-
-        self.render("03_single_entry.html", blogentry = blogentry)
+        self.render("03_single_entry.html", blogentry = blogentry, username = username)
 
 
 class MainPage(Handler):
@@ -198,7 +213,7 @@ def check_disclaimer(disclaimer, error_message=''):
 
 # RegisterPage
 
-class RegisterPage(Handler):
+class Register(Handler):
 
     
     def get(self):
@@ -335,9 +350,9 @@ class Debug(Handler):
 # Function triggering the page generation
 app = webapp2.WSGIApplication([
                              ('/blog', MainPage),
-                             ('/blog/newpost', NewPostHandler),
-                             ('/blog/([0-9]+)', SinglePostDisplay),
-                             ('/blog/register', RegisterPage),
+                             ('/blog/newpost', NewPost),
+                             ('/blog/([0-9]+)', SinglePost),
+                             ('/blog/register', Register),
                              ('/blog/login', Login),
                              ('/blog/logout', Logout),
                              ('/blog/welcome', Welcome),

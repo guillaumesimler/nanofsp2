@@ -1,6 +1,4 @@
 
-
-
 {% extends "01_pageheader.html" %}
 
 {% block content %}
@@ -24,7 +22,20 @@
 			<hr>
 
 				<pre>{{blogentry.bodytext | safe}}</pre>
+
+			<br>
+			
+			{% if username == blogentry.contributor %}
+				<p>
+					<form method ="post">
+						<input type="submit" value="Edit">
+					</form>
+				</p>
+			{% endif%}
+
 		</article>
+
+
 
 
 {% endblock %}
