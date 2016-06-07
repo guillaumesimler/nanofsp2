@@ -53,8 +53,9 @@ class Handler(webapp2.RequestHandler):
         self.write(self.render_str(template, **kw))
 
     # ------- Personal Addition: cookie validation -------
-    def render_newpost(self, title="", bodytext="", error=""):
-        self.render("04_newpost.html", title = title, bodytext = bodytext, error = error)
+    def render_newpost(self, title="", bodytext="", error="", user=""):
+        user = self.get_user()
+        self.render("04_newpost.html", title = title, bodytext = bodytext, error = error, user = user)
 
     def checkcookie(self):
         cookie = self.request.cookies.get('id')
@@ -122,6 +123,7 @@ class NewPost(Handler):
 
     def get(self):
         self.checkcookie()
+        username = self.get_user()
         self.render_newpost()
 
     def post(self):
@@ -163,7 +165,7 @@ class SinglePost(Handler):
         if not blogentry:
             self.error(404)
 
-        self.render("03_singlepost.html", blogentry = blogentry, username = username)
+        self.render("03_singlepost.html", blogentry = blogentry, username = username, user = username)
 
 
     def post(self, keyid):
@@ -184,7 +186,7 @@ class SingleEdit(Handler):
         blogentry = self.get_blogentry(keyid)
 
         if blogentry:
-            self.render_newpost(title = blogentry.title, bodytext = blogentry.bodytext, error = "in Editing Mode")
+            self.render_newpost(title = blogentry.title, bodytext = blogentry.bodytext, error = "in Editing Mode", user = username)
         
         else:
             self.redirect('/blog')
@@ -213,7 +215,6 @@ class SingleEdit(Handler):
             self.redirect('/blog')
 
 
-
 class MainPage(Handler):
 
     def get(self):
@@ -221,7 +222,9 @@ class MainPage(Handler):
 
         blogentries= db.GqlQuery("SELECT * FROM Blogentries ORDER BY date DESC LIMIT 10")
 
-        self.render("02_front-page.html", blogentries = blogentries)
+        username = self.get_user()
+
+        self.render("02_front-page.html", blogentries = blogentries, user = username)
 
 
 # --------------------    Login & register Section        --------------------
@@ -273,13 +276,13 @@ def check_disclaimer(disclaimer, error_message=''):
 
     return error_message
 
+
 # RegisterPage
 
 class Register(Handler):
-
     
     def get(self):
-        self.render("10_register.html", errors = '', values= '')
+        self.render("12_register.html", errors = '', values= '')
 
     def post(self):
         username = self.request.get('username')
@@ -327,7 +330,7 @@ class Register(Handler):
 
             self.response.headers.add_header('Set-Cookie', 'id=%s; Path=/' % new_cookie)
             
-            self.redirect('/blog/welcome')
+            self.redirect('/blog')
         else:    
             self.render("10_register.html", errors = errors, values = values) 
 

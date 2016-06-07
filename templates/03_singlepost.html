@@ -5,11 +5,11 @@
 
 		<article>
 			<div class="post_header">
-				<div class="title">
+				<div class="post_title">
 					<a href="/blog/{{blogentry.key().id()}}"><b>{{blogentry.title}}</b></a>,
 
 					{%if blogentry.contributor %}
-						posted by <span class="post_author">{{blogentry.contributor}}</span>
+						posted by <span class="post_contributor">{{blogentry.contributor}}</span>
 					{% endif %}
 
 				</div>

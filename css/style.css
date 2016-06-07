@@ -22,8 +22,9 @@ p {
 }
 
 
-/*Structures the entry form. Relevance for:
-- newpost.html
+
+/*Structures the entry linl. Relevance for:
+- 02_front-page.html
 
 */
 
@@ -33,11 +34,49 @@ p {
 	min-height: 24px;
 }	
 
+/*Display of the text area. Relevance for:
+- single_entry.html 
+- front-page.html
+*/
+
+
 .text_area {
 	width: 400px;
 	height: 500px;
 }
 
+/*Display of the page. Relevance for:
+- 01_pageheader.html
+
+and consequently
+
+- 02_front-page.html
+- 03_singlepost.html
+- 04_new-post.htmö
+*/
+
+.blog_header {
+	display: flex;
+	display: -webkit-flex;
+	display: -moz-flex;
+	margin: 20px 0;
+}
+
+.blog_title {
+	min-height: 24px;
+	width: 50%;
+}
+
+.blog_contributor{
+	font-weight: bold;
+	color: green;
+}
+
+.blog_logout {
+	text-align: right;
+	width: 50%;
+	font-weight: bold;
+}
 
 /*Display of the text area. Relevance for:
 - single_entry.html 
@@ -49,7 +88,6 @@ p {
 	display: -webkit-flex;
 	display: -moz-flex;
 }
-
 
 .post_title {
 	min-height: 24px;
@@ -64,8 +102,7 @@ p {
 .post_date {
 	text-align: right;
 	width: 50%;
-};
-
+}
 
 
 /* Display the register form. Relevance for:
