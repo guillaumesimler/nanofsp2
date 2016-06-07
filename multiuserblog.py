@@ -3,6 +3,9 @@
 #  A Program by Guillaume Simler
 
 
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# !!!!!!!!!!!!!!!!! Libraries + "init" !!!!!!!!!!!!!!!!!
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 # Libraries:
 # jinja2 (templating lib), webapp2 (main GAE library) &
@@ -28,7 +31,10 @@ jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
                             autoescape= True)
 
 
-#Helper Class (reduce work in handler)
+
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# !!!!!!!!!!!!!!!!! GAE Helper Classes !!!!!!!!!!!!!!!!!
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 # classic HTML write order from GAE
@@ -51,9 +57,13 @@ class Handler(webapp2.RequestHandler):
         cookie = self.request.cookies.get('id')
         
         if not cookie or not security.check_cookie(cookie):
-            self.redirect('/blog/login')
+            q = "Please log in"
+            self.redirect('/blog/login?q=' + q)
 
 
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# !!!!!!!!!!!!!!!!! DataStore Classes !!!!!!!!!!!!!!!!!
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 # Create the entity (Google Datastore's table)
 # (for more info - please check the readme )
@@ -80,9 +90,11 @@ class UserData(db.Model):
         k = UserData.all().filter('Username =', name).fetch(1)
         return k
 
-# Main Classes
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# !!!!!!!!!!!!!!!!!!!! Main Classes !!!!!!!!!!!!!!!!!!!!
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-# --------------------------------    Page display Section        ---------------------------------
+# --------------------   Page display Section        --------------------
 
 class NewPostHandler(Handler):
     def render_newpost(self, title="", bodytext="", error=""):
@@ -125,7 +137,6 @@ class SinglePostDisplay(Handler):
         self.render("03_single_entry.html", blogentry = blogentry)
 
 
-
 class MainPage(Handler):
 
     def get(self):
@@ -136,9 +147,7 @@ class MainPage(Handler):
         self.render("02_front-page.html", blogentries = blogentries)
 
 
-# --------------------------------    Login & register Section        ---------------------------------
-
-
+# --------------------    Login & register Section        --------------------
 
 # Helper function for register
 
@@ -155,6 +164,7 @@ def check_user(username, error_message = ''):
 
     return error_message
 
+
 def check_fir_pass(fir_password, error_message = ''):
     fir_re = re.compile(r"^.{6,20}$")
 
@@ -163,11 +173,13 @@ def check_fir_pass(fir_password, error_message = ''):
 
     return error_message
 
+
 def check_sec_pass(fir_password, sec_password, error_message=''):
     if not fir_password or not sec_password or fir_password != sec_password:
         error_message = "Your passwords don't match"
 
     return error_message
+
 
 def check_email(email, error_message=''):
     email_re = re.compile(r"^[\S]+@[\S]+.[\S]+$")
@@ -243,11 +255,11 @@ class RegisterPage(Handler):
             self.render("10_register.html", errors = errors, values = values) 
 
 
-
 class Login(Handler):
 
     def get(self):
-        self.render("11_login.html", error='')
+        error = self.request.get('q')
+        self.render("11_login.html", error=error)
 
     def post(self):
 
@@ -267,6 +279,15 @@ class Login(Handler):
             self.render("11_login.html", error = 'no valid username or password')
 
 
+class Logout(Handler):
+
+    def get(self):
+        self.response.headers.add_header('Set-Cookie', 'id= ; Path=/')
+
+        q = "You've been logged out"
+        self.redirect('/blog/login?q=' + q)
+
+        
 # --------------------------------    Legacy Section        ---------------------------------
 
 class Welcome(Handler):
@@ -285,6 +306,7 @@ class Welcome(Handler):
 
         else:
             self.write('<h1>Bug</h1>')
+
 
 # --------------------------------    Debug Section        ---------------------------------
 # helper functions to debug
@@ -317,6 +339,7 @@ app = webapp2.WSGIApplication([
                              ('/blog/([0-9]+)', SinglePostDisplay),
                              ('/blog/register', RegisterPage),
                              ('/blog/login', Login),
+                             ('/blog/logout', Logout),
                              ('/blog/welcome', Welcome),
                              ('/blog/debug', Debug)
                             ],
