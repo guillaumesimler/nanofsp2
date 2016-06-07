@@ -204,9 +204,12 @@ class SingleEdit(Handler):
             title = self.request.get("title")
             bodytext = self.request.get("bodytext")
 
+            blogentry.title = title
+            blogentry.bodytext = bodytext
+
             blogentry.put()
 
-            self.redirect('/blog/' + keyid)
+            self.redirect('/blog/' + str(keyid))
 
         elif edit == "delete":
 
@@ -404,7 +407,14 @@ class Debug(Handler):
 
         k1 = UserData.all().filter('Username =', name).fetch(10)
 
-        # db content
+        # Usedata content
+
+        k2 = db.GqlQuery("SELECT * FROM UserData ORDER BY Username")
+
+
+
+
+        # Blog content
 
         k2 = db.GqlQuery("SELECT * FROM UserData ORDER BY Username")
 
