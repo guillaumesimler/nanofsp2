@@ -96,6 +96,9 @@ class Blogentries(db.Model):
     contributor = db.StringProperty(required = True)
     date = db.DateTimeProperty(auto_now_add = True)
     modified = db.DateTimeProperty(auto_now = True)
+    likes = db.IntegerProperty()
+    dislikes = db.IntegerProperty()
+    comments = db.IntegerProperty()
 
 
 class UserData(db.Model):
@@ -370,6 +373,38 @@ class Logout(Handler):
         q = "You've been logged out"
         self.redirect('/blog/login?q=' + q)
 
+# --------------------------------    Comment Section        ---------------------------------
+
+class Like(Handler):
+    def get (self):
+        q = self.request.get('q')
+
+        post = Blogentries.get_by_id(int(q))
+
+        if post.likes:
+            post.likes += 1
+        else:
+            post.likes = 1
+
+        post.put()
+
+        self.redirect('/blog/%s' %q)
+
+
+class Dislike(Handler):
+    def get (self):
+        q = self.request.get('q')
+
+        post = Blogentries.get_by_id(int(q))
+
+        if post.dislikes:
+            post.dislikes += 1
+        else:
+            post.dislikes = 1
+
+        post.put()
+
+        self.redirect('/blog/%s' %q)
         
 # --------------------------------    Legacy Section        ---------------------------------
 
@@ -428,6 +463,8 @@ app = webapp2.WSGIApplication([
                              ('/blog/newpost', NewPost),
                              ('/blog/([0-9]+)', SinglePost),
                              ('/blog/edit', SingleEdit),
+                             ('/blog/like', Like),
+                             ('/blog/dislike', Dislike),
                              ('/blog/register', Register),
                              ('/blog/login', Login),
                              ('/blog/logout', Logout),

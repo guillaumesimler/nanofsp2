@@ -52,6 +52,39 @@ This page has two main sections:
 					partially the escaping -->
 				<pre>{{entry.bodytext | safe}}</pre>
 
+
+			<div class="post_reviews">
+
+				<span class="post_comments">
+					Comments: 
+					{%if entry.comments%}
+						{{entry.comments}}
+					{% else %}
+						0
+					{% endif %}
+				</span>
+
+				<span class="post_likes">
+					👍: 
+					{%if entry.likes%}
+						{{entry.likes}}
+					{% else %}
+						0
+					{% endif %}
+				</span>
+
+				<span class="post_dislikes">
+					👎: 
+					{%if entry.dislikes%}
+						{{entry.dislikes}}
+					{% else %}
+						0
+					{% endif %}
+				</span>
+
+
+			</div>
+
 		</article>
 
 	{% endfor %}

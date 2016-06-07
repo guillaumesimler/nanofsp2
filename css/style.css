@@ -104,7 +104,44 @@ and consequently
 	width: 50%;
 }
 
+.post_reviews {
+	position: center;
+	text-align: center;
+	margin: 10px 0;
+	font-weight: bold;
+}
 
+.post_comments {
+	font-style: italic;
+}
+
+
+.post_likes {
+	color: green;
+}
+
+.post_dislikes {
+	color: red;
+}
+
+.post_addition {
+	display: flex;
+	display: -webkit-flex;
+	display: -moz-flex;
+	text-align: center;
+}
+
+.post_addcom {
+	width: 33%;
+}
+
+.post_addlik {
+	width: 34%;
+}
+
+.post_adddis {
+	width: 33%;
+}
 /* Display the register form. Relevance for:
 - register.html 
  */
@@ -113,6 +150,7 @@ and consequently
 	display: flex;
 	display: -webkit-flex;
 	display: -moz-flex;
+	position: center;
 }
 
 .register_text {

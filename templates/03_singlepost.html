@@ -3,37 +3,93 @@
 
 {% block content %}
 
-		<article>
-			<div class="post_header">
-				<div class="post_title">
-					<a href="/blog/{{blogentry.key().id()}}"><b>{{blogentry.title}}</b></a>,
+	<article>
+		<div class="post_header">
+			<div class="post_title">
+				<a href="/blog/{{blogentry.key().id()}}"><b>{{blogentry.title}}</b></a>,
 
-					{%if blogentry.contributor %}
-						posted by <span class="post_contributor">{{blogentry.contributor}}</span>
-					{% endif %}
+				{%if blogentry.contributor %}
+					posted by <span class="post_contributor">{{blogentry.contributor}}</span>
+				{% endif %}
 
-				</div>
-
-				<div class="post_date">
-					{{blogentry.date.strftime("%B %d %Y") }}
-				</div>
 			</div>
+
+			<div class="post_date">
+				{{blogentry.date.strftime("%B %d %Y") }}
+			</div>
+		</div>
+
+		<hr>
+
+			<pre>{{blogentry.bodytext | safe}}</pre>
+
+		<br>
+		
+		{% if username == blogentry.contributor %}
+			<p>
+				As you're the author, you can edit the post
+			</p>
+
+			<p>
+				<form method ="post">
+					<input type="submit" value="Edit the post">
+				</form>
+			</p>
+		{% endif%}
+
+
+		<hr>
+
+		<div class="post_reviews">
+
+			<span class="post_comments">
+				Comments: 
+				{%if blogentry.comments%}
+					{{blogentry.comments}}
+				{% else %}
+					0
+				{% endif %}
+			</span>
+
+			<span class="post_likes">
+				👍: 
+				{%if blogentry.likes%}
+					{{blogentry.likes}}
+				{% else %}
+					0
+				{% endif %}
+			</span>
+
+			<span class="post_dislikes">
+				👎: 
+				{%if blogentry.dislikes%}
+					{{blogentry.dislikes}}
+				{% else %}
+					0
+				{% endif %}
+			</span>
 
 			<hr>
 
-				<pre>{{blogentry.bodytext | safe}}</pre>
+		</div>
 
-			<br>
+		<div class= "post_addition">
+			<div class="post_addcom">
+				<a href="/blog/comment?q={{blogentry.key().id()}}">Add a comment</a>
+			</div>
+
+			<div class="post_addlik">
+				<a href="/blog/like?q={{blogentry.key().id()}}">Like this post</a>
+			</div>
 			
-			{% if username == blogentry.contributor %}
-				<p>
-					<form method ="post">
-						<input type="submit" value="Edit">
-					</form>
-				</p>
-			{% endif%}
+			<div class="post_adddis">
+				<a href="/blog/dislike?q={{blogentry.key().id()}}">Dislike this post</a>
+			</div>
+		</div>
 
-		</article>
+		<hr>
+
+	</article>
 
 
 
