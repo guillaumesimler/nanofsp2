@@ -72,7 +72,9 @@ class Handler(webapp2.RequestHandler):
 
             username = UserData.get_by_id(cookie).Username
 
-        return username
+            return username
+
+        
 
 
     def get_blogentry(self, keyid):
@@ -224,7 +226,6 @@ class SingleEdit(Handler):
 class MainPage(Handler):
 
     def get(self):
-        self.checkcookie()
 
         blogentries= db.GqlQuery("SELECT * FROM Blogentries ORDER BY date DESC LIMIT 10")
 
@@ -464,7 +465,7 @@ app = webapp2.WSGIApplication([
                              ('/blog/([0-9]+)', SinglePost),
                              ('/blog/edit', SingleEdit),
                              ('/blog/like', Like),
-                             ('/blog/dislike', Dislike),
+                             ('/blog/disgitlike', Dislike),
                              ('/blog/register', Register),
                              ('/blog/login', Login),
                              ('/blog/logout', Logout),

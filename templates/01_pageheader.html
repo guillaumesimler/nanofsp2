@@ -28,13 +28,21 @@
 	<hr>
 
 	<div class ="blog_header">
-		<div class='blog_title'>
-			Logged in as <span class="blog_contributor">{{user}}
-		</div>
+		{%if user %}
+			<div class='blog_title'>
+				Logged in as <span class="blog_contributor">{{user}}
+			</div>
 
-		<div class='blog_logout'>
-			<a href="/blog/logout">Log out</a>
-		</div>
+			<div class='blog_logout'>
+				<a href="/blog/logout">Log out</a>
+			</div>
+
+		{% else %}
+			<div class='blog_title'>
+				You're not logged in. <a href="blog/login">Please click here to loggin</a>
+			</div>
+
+		{% endif %}
 	</div>
 
 	<hr>
