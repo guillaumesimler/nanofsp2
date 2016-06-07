@@ -53,6 +53,9 @@ class Handler(webapp2.RequestHandler):
         self.write(self.render_str(template, **kw))
 
     # ------- Personal Addition: cookie validation -------
+    def render_newpost(self, title="", bodytext="", error=""):
+        self.render("04_newpost.html", title = title, bodytext = bodytext, error = error)
+
     def checkcookie(self):
         cookie = self.request.cookies.get('id')
         
@@ -69,6 +72,14 @@ class Handler(webapp2.RequestHandler):
             username = UserData.get_by_id(cookie).Username
 
         return username
+
+
+    def get_blogentry(self, keyid):
+
+        key = db.Key.from_path('Blogentries', int(keyid))
+        blogentry = db.get(key)
+
+        return blogentry
 
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -108,8 +119,6 @@ class UserData(db.Model):
 # --------------------   Page display Section        --------------------
 
 class NewPost(Handler):
-    def render_newpost(self, title="", bodytext="", error=""):
-        self.render("04_newpost.html", title = title, bodytext = bodytext, error = error)
 
     def get(self):
         self.checkcookie()
@@ -119,16 +128,22 @@ class NewPost(Handler):
 
         title = self.request.get("title")
         bodytext = self.request.get("bodytext")
+        edit = self.request.get("edit")
 
         username = self.get_user()
 
+
         if bodytext and title:
-            b = Blogentries(title= title, bodytext=bodytext, contributor=username)
-            b.put()
+            if edit == "edit":
+                b = Blogentries(title= title, bodytext=bodytext, contributor=username)
+                b.put()
 
-            key = b.key().id()
+                key = b.key().id()
 
-            self.redirect('/blog/%s' % str(key))
+                self.redirect('/blog/%s' % str(key))
+
+            else:
+                self.redirect('/blog')
 
         else:
             error = "Something went wrong. The title or the bodytext were not filled"
@@ -137,19 +152,66 @@ class NewPost(Handler):
 
 
 class SinglePost(Handler):
-    def get(self, keyid):
-        
-        self.checkcookie()
+    
 
+    def get(self, keyid):
+        self.checkcookie()
         username = self.get_user()
 
-        key = db.Key.from_path('Blogentries', int(keyid))
-        blogentry = db.get(key)
+        blogentry = self.get_blogentry(keyid)
 
         if not blogentry:
             self.error(404)
 
-        self.render("03_single_entry.html", blogentry = blogentry, username = username)
+        self.render("03_singlepost.html", blogentry = blogentry, username = username)
+
+
+    def post(self, keyid):
+        blogentry = self.get_blogentry(keyid)
+
+        self.redirect("/blog/edit?q=" + str(blogentry.key().id()))
+
+
+class SingleEdit(Handler):
+
+
+    def get(self):
+
+        self.checkcookie()
+        username = self.get_user()
+
+        keyid = self.request.get('q')
+        blogentry = self.get_blogentry(keyid)
+
+        if blogentry:
+            self.render_newpost(title = blogentry.title, bodytext = blogentry.bodytext, error = "in Editing Mode")
+        
+        else:
+            self.redirect('/blog')
+
+
+
+    def post(self):
+
+        keyid = int(self.request.get("q"))
+        blogentry = self.get_blogentry(keyid)
+
+        edit = self.request.get("edit")
+
+        if edit == "edit":
+            title = self.request.get("title")
+            bodytext = self.request.get("bodytext")
+
+            blogentry.put()
+
+            self.redirect('/blog/' + keyid)
+
+        elif edit == "delete":
+
+            k = Blogentries.delete(blogentry)
+
+            self.redirect('/blog')
+
 
 
 class MainPage(Handler):
@@ -352,6 +414,7 @@ app = webapp2.WSGIApplication([
                              ('/blog', MainPage),
                              ('/blog/newpost', NewPost),
                              ('/blog/([0-9]+)', SinglePost),
+                             ('/blog/edit', SingleEdit),
                              ('/blog/register', Register),
                              ('/blog/login', Login),
                              ('/blog/logout', Logout),

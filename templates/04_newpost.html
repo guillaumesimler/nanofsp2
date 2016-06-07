@@ -23,7 +23,28 @@ As such this page also has a POST method. It is managed  by the NewPostHandler
 
 	<br>
 
-	<input type="submit">
+	<label>
+		<p>
+			Your options:
+		</p>
+
+		<p>
+			<input type="radio" name="edit" value ="edit">Save/Edit 
+		</p>
+
+		<p>
+			<input type="radio" name="edit" value ="cancel">Cancel 
+		</p>
+
+		{% if error == "in Editing Mode" %}
+		<p>
+			<input type="radio" name="edit" value ="delete">Delete
+		</p>
+
+		{% endif %}
+	</label>
+
+	<input type="submit" value="Confirm">
 </form>
 
 <p>{{error}}</p>
