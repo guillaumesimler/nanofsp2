@@ -26,15 +26,17 @@
 		<br>
 		
 		{% if username == blogentry.contributor %}
-			<p>
-				As you're the author, you can edit the post
-			</p>
+			<div class="post_links">
+				<p>
+					As you're the author, you can edit the post
+				</p>
 
-			<p>
-				<form method ="post">
-					<input type="submit" value="Edit the post">
-				</form>
-			</p>
+				<p>
+					<form method ="post">
+						<input type="submit" value="Edit the post">
+					</form>
+				</p>
+			</div>
 		{% endif%}
 
 
@@ -71,7 +73,12 @@
 				👎: {{blogentry.dislikes}}
 			</span>
 
+			<br>
+
+			<p>{{error}}</P>
+
 			<hr>
+
 		</div>
 
 		<div>
@@ -83,7 +90,10 @@
 			 	<br>
 
 			 	{% if user == comment.author%}
-			 		<a href="{{'/blog/editcomment?q=%s&r=%s' %(blogentry.key().id(), comment.key().id())}}">Edit this post</a>
+
+			 	<div class="post_links">
+			 		<a href="{{'/blog/editcomment?q=%s&r=%s' %(blogentry.key().id(), comment.key().id())}}"><b>Edit this post</b></a>
+			 	</div>
 			 	{% endif%}
 
 			 	<hr>

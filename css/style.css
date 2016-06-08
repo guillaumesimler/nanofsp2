@@ -39,9 +39,13 @@ p {
 - front-page.html
 */
 
+.text_title {
+	width: 50%;
+
+}
 
 .text_area {
-	width: 400px;
+	width: 50%;
 	height: 500px;
 }
 
@@ -51,9 +55,7 @@ p {
 	width: 75%;
 	overflow: scroll;
 }
-.comment_title {
-	width: 50%;
-}
+
 
 .comment_area {
 	width: 50%;
@@ -118,6 +120,11 @@ and consequently
 	width: 50%;
 }
 
+.post_links {
+	position: center;
+	text-align: center;
+}
+
 .post_reviews {
 	position: center;
 	text-align: center;
@@ -128,7 +135,6 @@ and consequently
 .post_comments {
 	font-style: italic;
 }
-
 
 .post_likes {
 	color: green;

@@ -83,7 +83,6 @@ class Handler(webapp2.RequestHandler):
         return blogentry
 
 
-
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # !!!!!!!!!!!!!!!!! DataStore Classes !!!!!!!!!!!!!!!!!
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -181,11 +180,19 @@ class SinglePost(Handler):
 
         comments = PostComments.by_postkey(keyid)
 
+        q = self.request.get('q')
+
+        if q == 'no':
+            error = "Nice try, but it's your post !!!!"
+        else:
+            error = ''
+
         if not blogentry:
             self.error(404)
 
         self.render("03_singlepost.html", blogentry = blogentry,
-                    username = username, comments = comments, user = username)
+                    username = username, comments = comments, 
+                    error = error, user = username)
 
 
     def post(self, keyid):
@@ -195,14 +202,22 @@ class SinglePost(Handler):
 
 
 class SingleEdit(Handler):
-
-    def get(self):
-
+    def init(self):
         self.checkcookie()
         username = self.get_user()
 
         keyid = self.request.get('q')
         blogentry = self.get_blogentry(keyid)
+
+        return [blogentry, keyid, username]
+
+
+    def get(self):
+
+        init_val = self.init()
+        
+        blogentry = init_val[0]
+        username = init_val[2]
 
         if blogentry:
             self.render_newpost(title = blogentry.title,
@@ -216,9 +231,12 @@ class SingleEdit(Handler):
 
     def post(self):
 
-        keyid = int(self.request.get("q"))
-        blogentry = self.get_blogentry(keyid)
-
+        init_val = self.init()
+        
+        blogentry = init_val[0]
+        keyid = init_val[1]
+        username = init_val[2]
+        
         edit = self.request.get("edit")
 
         if edit == "edit":
@@ -236,7 +254,8 @@ class SingleEdit(Handler):
 
             k = Blogentries.delete(blogentry)
 
-            self.redirect('/blog')
+            
+        self.redirect('/blog')
 
 
 class MainPage(Handler):
@@ -379,7 +398,7 @@ class Register(Handler):
 
             self.redirect('/blog')
         else:
-            self.render("10_register.html", errors = errors, values = values)
+            self.render("12_register.html", errors = errors, values = values)
 
 
 class Login(Handler):
@@ -396,15 +415,15 @@ class Login(Handler):
         password = self.request.get("password")
 
         # Get the database entry
-        check_name = UserData.by_name(username)[0]
+        check_name = UserData.by_name(username)
 
         # Run the security test:
         # 1. there must be a registered user
         # 2. the password must be verified
 
-        if check_name and security.check_pw(username, password, check_name.hPassword):
+        if check_name and security.check_pw(username, password, check_name[0].hPassword):
            # creates a secure cookie in case the tests succeed
-            key = str(check_name.key().id())
+            key = str(check_name[0].key().id())
             new_cookie = security.encode_cookie(key)
 
             self.response.headers.add_header('Set-Cookie', 'id=%s; Path=/' % new_cookie)
@@ -439,14 +458,16 @@ class Like(Handler):
 
         post = Blogentries.get_by_id(int(q))
 
-        if post.likes:
-            post.likes += 1
+        if post.contributor == self.get_user():
+            error = "no"
+            self.redirect('/blog/%s?q=%s' %(q, error))
+
+
         else:
-            post.likes = 1
+            post.likes += 1
+            post.put()
 
-        post.put()
-
-        self.redirect('/blog/%s' %q)
+            self.redirect('/blog/%s' %q)
 
 
 class Dislike(Handler):
@@ -456,14 +477,15 @@ class Dislike(Handler):
 
         post = Blogentries.get_by_id(int(q))
 
-        if post.dislikes:
-            post.dislikes += 1
+        if post.contributor == self.get_user():
+            error = "no"
+            self.redirect('/blog/%s?q=%s' %(q, error))
+
         else:
-            post.dislikes = 1
+            post.dislikes += 1
+            post.put()
 
-        post.put()
-
-        self.redirect('/blog/%s' %q)
+            self.redirect('/blog/%s' %q)
 
 
 class AddComment(Handler):
@@ -496,7 +518,7 @@ class AddComment(Handler):
             blogentry.put()
 
         
-        self.redirect('/blog')
+        self.redirect('/blog/%s' %q)
 
 
 
@@ -541,7 +563,7 @@ class EditComment(Handler):
             init_val[0].put()
 
         
-        self.redirect('/blog')
+        self.redirect('/blog/%s' %init_val[0].key().id())
        
 # --------------------------------    Legacy Section        ---------------------------------
 
