@@ -77,8 +77,17 @@
 		<div>
 		{% if comments %}
 			 {% for comment in comments %}
-			 	<h5>A comment by {{comment.author}}</h5>
+			 	<h4>A comment by {{comment.author}}</h5>
 			 	<pre>{{comment.comment |safe}}</pre>
+
+			 	<br>
+
+			 	{% if user == comment.author%}
+			 		<a href="{{'/blog/editcomment?q=%s&r=%s' %(blogentry.key().id(), comment.key().id())}}">Edit this post</a>
+			 	{% endif%}
+
+			 	<hr>
+
 			 {% endfor%}
 		{% endif %}
 

@@ -83,6 +83,7 @@ class Handler(webapp2.RequestHandler):
         return blogentry
 
 
+
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # !!!!!!!!!!!!!!!!! DataStore Classes !!!!!!!!!!!!!!!!!
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -474,7 +475,7 @@ class AddComment(Handler):
 
         username = self.get_user()
 
-        self.render("05_newcomment.html", blogentry = blogentry, user = username)
+        self.render("05_newcomment.html", blogentry = blogentry, comment = '', user = username)
 
     def post(self):
         q = self.request.get('q')
@@ -498,7 +499,50 @@ class AddComment(Handler):
         self.redirect('/blog')
 
 
+
+class EditComment(Handler):
+    def init(self):
+        self.checkcookie()
+        q = self.request.get('q')
+        r = self.request.get('r')
+
+        blogentry = self.get_blogentry(q)
+        commententry = PostComments.get_by_id(int(r))
+
+        username = self.get_user()
+
+        return [blogentry, commententry, username]
+    
+    def get(self):
         
+        init_val = self.init()
+
+        self.render("05_newcomment.html", blogentry = init_val[0], 
+                    comment = init_val[1].comment, user = init_val[2], 
+                    error = "in Editing Mode")
+
+    def post(self):
+        
+        init_val = self.init()
+        
+        comment = self.request.get('comment')
+        edit = self.request.get('edit')
+
+        if edit == 'edit' and comment:
+            #Increment comment counter
+            init_val[1].comment = comment
+            init_val[1].put()
+
+        if edit == 'delete' or not comment:
+            c = init_val[1]
+            c = PostComments.delete(c)
+
+            init_val[0].commentsnb = init_val[0].commentsnb -1
+            init_val[0].put()
+
+        
+        self.redirect('/blog')
+       
 # --------------------------------    Legacy Section        ---------------------------------
 
 class Welcome(Handler):
@@ -561,6 +605,7 @@ app = webapp2.WSGIApplication([
                              ('/blog/([0-9]+)', SinglePost),
                              ('/blog/edit', SingleEdit),
                              ('/blog/comment', AddComment),
+                             ('/blog/editcomment', EditComment),
                              ('/blog/like', Like),
                              ('/blog/dislike', Dislike),
                              ('/blog/register', Register),
