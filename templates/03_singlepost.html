@@ -40,38 +40,6 @@
 
 		<hr>
 
-		<div class="post_reviews">
-
-			<span class="post_comments">
-				Comments: 
-				{%if blogentry.comments%}
-					{{blogentry.comments}}
-				{% else %}
-					0
-				{% endif %}
-			</span>
-
-			<span class="post_likes">
-				👍: 
-				{%if blogentry.likes%}
-					{{blogentry.likes}}
-				{% else %}
-					0
-				{% endif %}
-			</span>
-
-			<span class="post_dislikes">
-				👎: 
-				{%if blogentry.dislikes%}
-					{{blogentry.dislikes}}
-				{% else %}
-					0
-				{% endif %}
-			</span>
-
-			<hr>
-
-		</div>
 
 		<div class= "post_addition">
 			<div class="post_addcom">
@@ -88,6 +56,35 @@
 		</div>
 
 		<hr>
+
+		<div class="post_reviews">
+
+			<span class="post_comments">
+				Comments: {{blogentry.commentsnb}}
+			</span>
+
+			<span class="post_likes">
+				👍:{{blogentry.likes}}
+			</span>
+
+			<span class="post_dislikes">
+				👎: {{blogentry.dislikes}}
+			</span>
+
+			<hr>
+		</div>
+
+		<div>
+		{% if comments %}
+			 {% for comment in comments %}
+			 	<h5>A comment by {{comment.author}}</h5>
+			 	<pre>{{comment.comment |safe}}</pre>
+			 {% endfor%}
+		{% endif %}
+
+		</div>
+
+
 
 	</article>
 

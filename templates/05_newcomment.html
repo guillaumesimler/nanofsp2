@@ -9,17 +9,21 @@ As such this page also has a POST method. It is managed  by the NewPostHandler
 {% extends "01_pageheader.html" %}
 
 {% block content %}
-<h3>New post</h3>
+
+<h3>New Comment to post</h3>
+
+<div class="comment_orign">
+	<p>{{blogentry.title}} by {{blogentry.contributor}}</p>
+
+	<pre>{{blogentry.bodytext}}</pre>
+</div>
+
+<br>
 
 <form method="post">
 	<label>
-		<p>Title</p>
-		<input type="text" name="title" value="{{title}}">
-	</label>
-
-	<label>
-		<p>Text</p>
-		<textarea class="text_area" name="bodytext">{{bodytext}}</textarea>
+		<p>Comment</p>
+		<textarea class="comment_area" name="comment">{{comment}}</textarea>
 	</label>
 
 	<br>

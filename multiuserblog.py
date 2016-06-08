@@ -75,9 +75,6 @@ class Handler(webapp2.RequestHandler):
 
             return username
 
-
-
-
     def get_blogentry(self, keyid):
 
         key = db.Key.from_path('Blogentries', int(keyid))
@@ -99,9 +96,21 @@ class Blogentries(db.Model):
     contributor = db.StringProperty(required = True)
     date = db.DateTimeProperty(auto_now_add = True)
     modified = db.DateTimeProperty(auto_now = True)
-    likes = db.IntegerProperty()
-    dislikes = db.IntegerProperty()
-    comments = db.IntegerProperty()
+    likes = db.IntegerProperty(default= 0)
+    dislikes = db.IntegerProperty(default= 0)
+    commentsnb = db.IntegerProperty(default= 0)
+
+
+class PostComments(db.Model):
+    postkey = db.IntegerProperty(required = True)
+    author = db.StringProperty(required = True)
+    comment = db.TextProperty(required = True)
+    date = db.DateTimeProperty(auto_now_add = True)
+
+    @classmethod
+    def by_postkey(self, id):
+        k = PostComments.all().filter('postkey =', int(id)).order('-date').fetch(100)
+        return k
 
 
 class UserData(db.Model):
@@ -169,11 +178,13 @@ class SinglePost(Handler):
 
         blogentry = self.get_blogentry(keyid)
 
+        comments = PostComments.by_postkey(keyid)
+
         if not blogentry:
             self.error(404)
 
         self.render("03_singlepost.html", blogentry = blogentry,
-                    username = username, user = username)
+                    username = username, comments = comments, user = username)
 
 
     def post(self, keyid):
@@ -183,7 +194,6 @@ class SinglePost(Handler):
 
 
 class SingleEdit(Handler):
-
 
     def get(self):
 
@@ -201,7 +211,6 @@ class SingleEdit(Handler):
 
         else:
             self.redirect('/blog')
-
 
 
     def post(self):
@@ -249,7 +258,7 @@ class MainPage(Handler):
 
 def check_user(username, error_message = ''):
 
-    # Check n°1: matching principles
+    # Check n1: matching principles
     # - only digits or letter
     # - min 6 digits
     user_re = re.compile(r"^[a-zA-Z0-9_-]{6,20}$")
@@ -257,7 +266,7 @@ def check_user(username, error_message = ''):
     if not user_re.match(username):
         error_message = 'The username does not fit the requirements'
 
-    # Check n°2: absence of identical entry
+    # Check n2: absence of identical entry
     k = UserData.by_name(username)
 
     if k:
@@ -268,7 +277,7 @@ def check_user(username, error_message = ''):
 
 def check_fir_pass(fir_password, error_message = ''):
 
-    # Check n°3: matching principles (min 6 characters)
+    # Check n3: matching principles (min 6 characters)
     fir_re = re.compile(r"^.{6,20}$")
 
     if not fir_re.match(fir_password):
@@ -279,7 +288,7 @@ def check_fir_pass(fir_password, error_message = ''):
 
 def check_sec_pass(fir_password, sec_password, error_message=''):
 
-    # check n°4: password confirmation.
+    # check n4: password confirmation.
     # It is a simplified version. I don't check for the empty string
     # as the previous check will refuse such an entry and if the second
     # string would be '', it could not match to the first
@@ -292,7 +301,7 @@ def check_sec_pass(fir_password, sec_password, error_message=''):
 
 def check_email(email, error_message=''):
 
-    # check n°4: matching principles (only for entry)
+    # check n4: matching principles (only for entry)
     email_re = re.compile(r"^[\S]+@[\S]+.[\S]+$")
 
     if email and not email_re.match(email):
@@ -302,7 +311,7 @@ def check_email(email, error_message=''):
 
 
 def check_disclaimer(disclaimer, error_message=''):
-    # check n°4: verify the box was checked
+    # check n4: verify the box was checked
     if disclaimer != 'on':
         error_message = 'Please accept the conditions to access the blog'
 
@@ -455,6 +464,41 @@ class Dislike(Handler):
 
         self.redirect('/blog/%s' %q)
 
+
+class AddComment(Handler):
+    
+    def get(self):
+        self.checkcookie()
+        q = self.request.get('q')
+        blogentry = self.get_blogentry(q)
+
+        username = self.get_user()
+
+        self.render("05_newcomment.html", blogentry = blogentry, user = username)
+
+    def post(self):
+        q = self.request.get('q')
+        blogentry = self.get_blogentry(q)
+
+        edit = self.request.get('edit')
+
+        author = self.get_user()
+        comment = self.request.get('comment')
+
+        if edit == 'edit' and comment:
+            #Increment comment counter
+            c = PostComments(postkey = int(q), author = author, comment = comment)
+            c.put()
+
+            blogentry = self.get_blogentry(q)
+            blogentry.commentsnb += 1
+            blogentry.put()
+
+        
+        self.redirect('/blog')
+
+
+        
 # --------------------------------    Legacy Section        ---------------------------------
 
 class Welcome(Handler):
@@ -496,13 +540,17 @@ class Debug(Handler):
         k2 = db.GqlQuery("SELECT * FROM UserData ORDER BY Username")
 
 
+       # Blog content
+
+        k3 = 'solved'
+
+        # Comments
 
 
-        # Blog content
+        k4 = PostComments.all().fetch(10)
 
-        k2 = db.GqlQuery("SELECT * FROM UserData ORDER BY Username")
 
-        self.render('99_debug.html', k1= k1, k2= k2)
+        self.render('99_debug.html', k1= k1, k2= k2, k3 = k3, k4 = k4)
 
 # ------------------------------------------------------------------------------------------
 
@@ -512,8 +560,9 @@ app = webapp2.WSGIApplication([
                              ('/blog/newpost', NewPost),
                              ('/blog/([0-9]+)', SinglePost),
                              ('/blog/edit', SingleEdit),
+                             ('/blog/comment', AddComment),
                              ('/blog/like', Like),
-                             ('/blog/disgitlike', Dislike),
+                             ('/blog/dislike', Dislike),
                              ('/blog/register', Register),
                              ('/blog/login', Login),
                              ('/blog/logout', Logout),

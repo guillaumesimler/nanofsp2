@@ -69,30 +69,15 @@ This page has two main sections:
 			<div class="post_reviews">
 
 				<span class="post_comments">
-					Comments: 
-					{%if entry.comments%}
-						{{entry.comments}}
-					{% else %}
-						0
-					{% endif %}
+					Comments:  {{entry.commentsnb}}
 				</span>
 
 				<span class="post_likes">
-					👍: 
-					{%if entry.likes%}
-						{{entry.likes}}
-					{% else %}
-						0
-					{% endif %}
+					👍:{{entry.likes}}
 				</span>
 
 				<span class="post_dislikes">
-					👎: 
-					{%if entry.dislikes%}
-						{{entry.dislikes}}
-					{% else %}
-						0
-					{% endif %}
+					👎: {{entry.dislikes}}	
 				</span>
 
 

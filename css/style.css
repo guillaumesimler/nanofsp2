@@ -45,6 +45,20 @@ p {
 	height: 500px;
 }
 
+
+.comment_orign {
+	height: 150px;
+	width: 75%;
+	overflow: scroll;
+}
+.comment_title {
+	width: 50%;
+}
+
+.comment_area {
+	width: 50%;
+	height: 200px;
+}
 /*Display of the page. Relevance for:
 - 01_pageheader.html
 

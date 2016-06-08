@@ -50,4 +50,20 @@ Last version, <b>k = UserData.all().filter('Username =', name).fetch(1)</b>, see
 
 <p>solved by indexing [0]</p>
 
+<h2>4. Check db consistency</h2>
+
+{% if k4 %}
+<ol>
+	{% for l in k4 %}
+		<li>{{l.postkey}}, {{l.author}}, {{l.comment}}, {{l.key().id()}} </li>
+
+	{% endfor %}
+
+</ol>
+{% else %}
+<p>the db is empty</p>
+{% endif %}
+
+
+
 {% endblock %}
