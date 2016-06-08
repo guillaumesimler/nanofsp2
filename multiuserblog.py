@@ -40,7 +40,7 @@ jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
 # classic HTML write order from GAE
 
 class Handler(webapp2.RequestHandler):
-    
+
     def write(self, *a, **kw):
         self.response.out.write(*a, **kw)
 
@@ -55,18 +55,19 @@ class Handler(webapp2.RequestHandler):
     # ------- Personal Addition: cookie validation -------
     def render_newpost(self, title="", bodytext="", error="", user=""):
         user = self.get_user()
-        self.render("04_newpost.html", title = title, bodytext = bodytext, error = error, user = user)
+        self.render("04_newpost.html", title = title, bodytext = bodytext,
+                     error = error, user = user)
 
     def checkcookie(self):
         cookie = self.request.cookies.get('id')
-        
+
         if not cookie or not security.check_cookie(cookie):
             q = "Please log in"
             self.redirect('/blog/login?q=' + q)
 
     def get_user(self):
         cookie = self.request.cookies.get('id')
-        
+
         if cookie and security.check_cookie(cookie):
             cookie = int(cookie.split('|')[0])
 
@@ -74,7 +75,7 @@ class Handler(webapp2.RequestHandler):
 
             return username
 
-        
+
 
 
     def get_blogentry(self, keyid):
@@ -142,7 +143,8 @@ class NewPost(Handler):
 
         if bodytext and title:
             if edit == "edit":
-                b = Blogentries(title= title, bodytext=bodytext, contributor=username)
+                b = Blogentries(title= title, bodytext=bodytext,
+                                contributor=username)
                 b.put()
 
                 key = b.key().id()
@@ -159,7 +161,7 @@ class NewPost(Handler):
 
 
 class SinglePost(Handler):
-    
+
 
     def get(self, keyid):
         self.checkcookie()
@@ -170,7 +172,8 @@ class SinglePost(Handler):
         if not blogentry:
             self.error(404)
 
-        self.render("03_singlepost.html", blogentry = blogentry, username = username, user = username)
+        self.render("03_singlepost.html", blogentry = blogentry,
+                    username = username, user = username)
 
 
     def post(self, keyid):
@@ -191,8 +194,11 @@ class SingleEdit(Handler):
         blogentry = self.get_blogentry(keyid)
 
         if blogentry:
-            self.render_newpost(title = blogentry.title, bodytext = blogentry.bodytext, error = "in Editing Mode", user = username)
-        
+            self.render_newpost(title = blogentry.title,
+                                bodytext = blogentry.bodytext,
+                                error = "in Editing Mode",
+                                user = username)
+
         else:
             self.redirect('/blog')
 
@@ -231,21 +237,29 @@ class MainPage(Handler):
 
         username = self.get_user()
 
-        self.render("02_front-page.html", blogentries = blogentries, user = username)
+        self.render("02_front-page.html", blogentries = blogentries,
+                    user = username)
 
 
 # --------------------    Login & register Section        --------------------
 
 # Helper function for register
+# These functions will check for the undesired properties
+# and return an error message or an empty
 
 def check_user(username, error_message = ''):
+
+    # Check n°1: matching principles
+    # - only digits or letter
+    # - min 6 digits
     user_re = re.compile(r"^[a-zA-Z0-9_-]{6,20}$")
 
     if not user_re.match(username):
         error_message = 'The username does not fit the requirements'
 
+    # Check n°2: absence of identical entry
     k = UserData.by_name(username)
-    
+
     if k:
         error_message = 'This username is already used'
 
@@ -253,6 +267,8 @@ def check_user(username, error_message = ''):
 
 
 def check_fir_pass(fir_password, error_message = ''):
+
+    # Check n°3: matching principles (min 6 characters)
     fir_re = re.compile(r"^.{6,20}$")
 
     if not fir_re.match(fir_password):
@@ -262,13 +278,21 @@ def check_fir_pass(fir_password, error_message = ''):
 
 
 def check_sec_pass(fir_password, sec_password, error_message=''):
-    if not fir_password or not sec_password or fir_password != sec_password:
+
+    # check n°4: password confirmation.
+    # It is a simplified version. I don't check for the empty string
+    # as the previous check will refuse such an entry and if the second
+    # string would be '', it could not match to the first
+
+    if fir_password != sec_password:
         error_message = "Your passwords don't match"
 
     return error_message
 
 
 def check_email(email, error_message=''):
+
+    # check n°4: matching principles (only for entry)
     email_re = re.compile(r"^[\S]+@[\S]+.[\S]+$")
 
     if email and not email_re.match(email):
@@ -278,6 +302,7 @@ def check_email(email, error_message=''):
 
 
 def check_disclaimer(disclaimer, error_message=''):
+    # check n°4: verify the box was checked
     if disclaimer != 'on':
         error_message = 'Please accept the conditions to access the blog'
 
@@ -287,7 +312,7 @@ def check_disclaimer(disclaimer, error_message=''):
 # RegisterPage
 
 class Register(Handler):
-    
+
     def get(self):
         self.render("12_register.html", errors = '', values= '')
 
@@ -298,10 +323,15 @@ class Register(Handler):
         email = self.request.get('email')
         disclaimer = self.request.get('disclaimer')
 
+        # As I choose to work with indexes (had a problem with
+        # dict), value is build symatrically to errors, the
+        # following list. The '' "fake" the structure
+
         values = [username,
                   '',
                   '',
-                  email]       
+                  email,
+                  '']
 
         # Run the checks and append the results to the list
         errors = [check_user(username),
@@ -325,7 +355,7 @@ class Register(Handler):
 
             # create the password
             hPassword = security.make_pw_hash(username, fir_password)
-            
+
             # create the database entry
             a = UserData(Username= username, hPassword = hPassword, Email = email)
             a.put()
@@ -336,26 +366,34 @@ class Register(Handler):
 
 
             self.response.headers.add_header('Set-Cookie', 'id=%s; Path=/' % new_cookie)
-            
+
             self.redirect('/blog')
-        else:    
-            self.render("10_register.html", errors = errors, values = values) 
+        else:
+            self.render("10_register.html", errors = errors, values = values)
 
 
 class Login(Handler):
 
     def get(self):
+        # This line is linked to Logout. I would push a message in q
         error = self.request.get('q')
         self.render("11_login.html", error=error)
 
     def post(self):
 
+        # Get the data from the form
         username = self.request.get("username")
         password = self.request.get("password")
 
+        # Get the database entry
         check_name = UserData.by_name(username)[0]
-        
+
+        # Run the security test:
+        # 1. there must be a registered user
+        # 2. the password must be verified
+
         if check_name and security.check_pw(username, password, check_name.hPassword):
+           # creates a secure cookie in case the tests succeed
             key = str(check_name.key().id())
             new_cookie = security.encode_cookie(key)
 
@@ -363,21 +401,30 @@ class Login(Handler):
 
             self.redirect('/blog')
         else:
+            # redirect to the login page with an error message
+            # I clearly deviate from the original assignment as I don't
+            # specify which element is wrong.
+            # So a hacker can't know which part is right.
             self.render("11_login.html", error = 'no valid username or password')
 
 
 class Logout(Handler):
 
     def get(self):
+
+        # The principle is easy: the logout function
+        # resets the cookie to a blank value (which would fail the
+        # security tests) and redirect the user to the login page
         self.response.headers.add_header('Set-Cookie', 'id= ; Path=/')
 
         q = "You've been logged out"
-        self.redirect('/blog/login?q=' + q)
+        self.redirect('/blog/login?q=%s' %q)
 
 # --------------------------------    Comment Section        ---------------------------------
 
 class Like(Handler):
-    def get (self):
+
+    def get(self):
         q = self.request.get('q')
 
         post = Blogentries.get_by_id(int(q))
@@ -393,7 +440,8 @@ class Like(Handler):
 
 
 class Dislike(Handler):
-    def get (self):
+
+    def get(self):
         q = self.request.get('q')
 
         post = Blogentries.get_by_id(int(q))
@@ -406,7 +454,7 @@ class Dislike(Handler):
         post.put()
 
         self.redirect('/blog/%s' %q)
-        
+
 # --------------------------------    Legacy Section        ---------------------------------
 
 class Welcome(Handler):
@@ -414,7 +462,7 @@ class Welcome(Handler):
     def get(self):
 
         cookie = self.request.cookies.get('id')
-        
+
 
         if security.check_cookie(cookie):
             cookie = int(cookie.split('|')[0])
@@ -437,7 +485,7 @@ def cleanupDb(key):
 class Debug(Handler):
 
     def get(self):
-      
+
         # first checkS
         name = 'Werther'
 
