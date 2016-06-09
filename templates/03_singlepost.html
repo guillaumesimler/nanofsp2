@@ -75,7 +75,7 @@
 
 			<br>
 
-			<p>{{error}}</P>
+			
 
 			<hr>
 
@@ -103,7 +103,11 @@
 
 		</div>
 
-
+		{% if error %}
+			<script type="text/javascript">
+				alert("{{error|safe}}")
+			</script>
+		{% endif %}
 
 	</article>
 

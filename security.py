@@ -1,4 +1,11 @@
-import random
+# ----- Multi User Block -----
+# ----- Security.py ------
+#
+#
+#  For obvious security reasons, the security management is
+#  outside the main file
+#
+#  A Program by Guillaume Simlerimport random
 import string
 import hashlib
 import hmac

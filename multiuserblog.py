@@ -183,7 +183,7 @@ class SinglePost(Handler):
         q = self.request.get('q')
 
         if q == 'no':
-            error = "Nice try, but it's your post !!!!"
+            error = "Nice try, but it's your post !!!! Be modest and let the other users rate it"
         else:
             error = ''
 
