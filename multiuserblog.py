@@ -27,9 +27,8 @@ from google.appengine.ext import db
 #   - automate the HTML escaping
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
-jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
-                            autoescape= True)
-
+jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),
+                               autoescape=True)
 
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -55,8 +54,8 @@ class Handler(webapp2.RequestHandler):
     # ------- Personal Addition: cookie validation -------
     def render_newpost(self, title="", bodytext="", error="", user=""):
         user = self.get_user()
-        self.render("04_newpost.html", title = title, bodytext = bodytext,
-                     error = error, user = user)
+        self.render("04_newpost.html", title=title, bodytext=bodytext,
+                    error=error, user=user)
 
     def checkcookie(self):
         cookie = self.request.cookies.get('id')
@@ -91,31 +90,32 @@ class Handler(webapp2.RequestHandler):
 # (for more info - please check the readme )
 
 class Blogentries(db.Model):
-    title = db.StringProperty(required = True)
-    bodytext = db.TextProperty(required = True)
-    contributor = db.StringProperty(required = True)
-    date = db.DateTimeProperty(auto_now_add = True)
-    modified = db.DateTimeProperty(auto_now = True)
-    likes = db.IntegerProperty(default= 0)
-    dislikes = db.IntegerProperty(default= 0)
-    commentsnb = db.IntegerProperty(default= 0)
+    title = db.StringProperty(required=True)
+    bodytext = db.TextProperty(required=True)
+    contributor = db.StringProperty(required=True)
+    date = db.DateTimeProperty(auto_now_add=True)
+    modified = db.DateTimeProperty(auto_now=True)
+    likes = db.IntegerProperty(default=0)
+    dislikes = db.IntegerProperty(default=0)
+    commentsnb = db.IntegerProperty(default=0)
 
 
 class PostComments(db.Model):
-    postkey = db.IntegerProperty(required = True)
-    author = db.StringProperty(required = True)
-    comment = db.TextProperty(required = True)
-    date = db.DateTimeProperty(auto_now_add = True)
+    postkey = db.IntegerProperty(required=True)
+    author = db.StringProperty(required=True)
+    comment = db.TextProperty(required=True)
+    date = db.DateTimeProperty(auto_now_add=True)
 
     @classmethod
     def by_postkey(self, id):
-        k = PostComments.all().filter('postkey =', int(id)).order('-date').fetch(100)
+        k = PostComments.all().filter(
+            'postkey =', int(id)).order('-date').fetch(100)
         return k
 
 
 class UserData(db.Model):
-    Username = db.StringProperty(required = True)
-    hPassword = db.StringProperty(required = True)
+    Username = db.StringProperty(required=True)
+    hPassword = db.StringProperty(required=True)
     Email = db.StringProperty()
 
     @classmethod
@@ -149,10 +149,9 @@ class NewPost(Handler):
 
         username = self.get_user()
 
-
         if bodytext and title:
             if edit == "edit":
-                b = Blogentries(title= title, bodytext=bodytext,
+                b = Blogentries(title=title, bodytext=bodytext,
                                 contributor=username)
                 b.put()
 
@@ -170,7 +169,6 @@ class NewPost(Handler):
 
 
 class SinglePost(Handler):
-
 
     def get(self, keyid):
         self.checkcookie()
@@ -190,10 +188,9 @@ class SinglePost(Handler):
         if not blogentry:
             self.error(404)
 
-        self.render("03_singlepost.html", blogentry = blogentry,
-                    username = username, comments = comments, 
-                    error = error, user = username)
-
+        self.render("03_singlepost.html", blogentry=blogentry,
+                    username=username, comments=comments,
+                    error=error, user=username)
 
     def post(self, keyid):
         blogentry = self.get_blogentry(keyid)
@@ -202,6 +199,7 @@ class SinglePost(Handler):
 
 
 class SingleEdit(Handler):
+
     def init(self):
         self.checkcookie()
         username = self.get_user()
@@ -211,32 +209,30 @@ class SingleEdit(Handler):
 
         return [blogentry, keyid, username]
 
-
     def get(self):
 
         init_val = self.init()
-        
+
         blogentry = init_val[0]
         username = init_val[2]
 
         if blogentry:
-            self.render_newpost(title = blogentry.title,
-                                bodytext = blogentry.bodytext,
-                                error = "in Editing Mode",
-                                user = username)
+            self.render_newpost(title=blogentry.title,
+                                bodytext=blogentry.bodytext,
+                                error="in Editing Mode",
+                                user=username)
 
         else:
             self.redirect('/blog')
 
-
     def post(self):
 
         init_val = self.init()
-        
+
         blogentry = init_val[0]
         keyid = init_val[1]
         username = init_val[2]
-        
+
         edit = self.request.get("edit")
 
         if edit == "edit":
@@ -254,7 +250,6 @@ class SingleEdit(Handler):
 
             k = Blogentries.delete(blogentry)
 
-            
         self.redirect('/blog')
 
 
@@ -262,12 +257,13 @@ class MainPage(Handler):
 
     def get(self):
 
-        blogentries= db.GqlQuery("SELECT * FROM Blogentries ORDER BY date DESC LIMIT 10")
+        blogentries = db.GqlQuery(
+            "SELECT * FROM Blogentries ORDER BY date DESC LIMIT 10")
 
         username = self.get_user()
 
-        self.render("02_front-page.html", blogentries = blogentries,
-                    user = username)
+        self.render("02_front-page.html", blogentries=blogentries,
+                    user=username)
 
 
 # --------------------    Login & register Section        --------------------
@@ -276,7 +272,7 @@ class MainPage(Handler):
 # These functions will check for the undesired properties
 # and return an error message or an empty
 
-def check_user(username, error_message = ''):
+def check_user(username, error_message=''):
 
     # Check n1: matching principles
     # - only digits or letter
@@ -295,7 +291,7 @@ def check_user(username, error_message = ''):
     return error_message
 
 
-def check_fir_pass(fir_password, error_message = ''):
+def check_fir_pass(fir_password, error_message=''):
 
     # Check n3: matching principles (min 6 characters)
     fir_re = re.compile(r"^.{6,20}$")
@@ -343,7 +339,7 @@ def check_disclaimer(disclaimer, error_message=''):
 class Register(Handler):
 
     def get(self):
-        self.render("12_register.html", errors = '', values= '')
+        self.render("12_register.html", errors='', values='')
 
     def post(self):
         username = self.request.get('username')
@@ -369,7 +365,6 @@ class Register(Handler):
                   check_email(email),
                   check_disclaimer(disclaimer)]
 
-
         # Check for errors: if yes, at least one error won't be ''
         mover = True
 
@@ -379,26 +374,25 @@ class Register(Handler):
 
        # implement the input
 
-
         if mover:
 
             # create the password
             hPassword = security.make_pw_hash(username, fir_password)
 
             # create the database entry
-            a = UserData(Username= username, hPassword = hPassword, Email = email)
+            a = UserData(Username=username, hPassword=hPassword, Email=email)
             a.put()
 
             # encode the cookie
             key = str(a.key().id())
             new_cookie = security.encode_cookie(key)
 
-
-            self.response.headers.add_header('Set-Cookie', 'id=%s; Path=/' % new_cookie)
+            self.response.headers.add_header(
+                'Set-Cookie', 'id=%s; Path=/' % new_cookie)
 
             self.redirect('/blog')
         else:
-            self.render("12_register.html", errors = errors, values = values)
+            self.render("12_register.html", errors=errors, values=values)
 
 
 class Login(Handler):
@@ -426,7 +420,8 @@ class Login(Handler):
             key = str(check_name[0].key().id())
             new_cookie = security.encode_cookie(key)
 
-            self.response.headers.add_header('Set-Cookie', 'id=%s; Path=/' % new_cookie)
+            self.response.headers.add_header(
+                'Set-Cookie', 'id=%s; Path=/' % new_cookie)
 
             self.redirect('/blog')
         else:
@@ -434,7 +429,7 @@ class Login(Handler):
             # I clearly deviate from the original assignment as I don't
             # specify which element is wrong.
             # So a hacker can't know which part is right.
-            self.render("11_login.html", error = 'no valid username or password')
+            self.render("11_login.html", error='no valid username or password')
 
 
 class Logout(Handler):
@@ -447,9 +442,10 @@ class Logout(Handler):
         self.response.headers.add_header('Set-Cookie', 'id= ; Path=/')
 
         q = "You've been logged out"
-        self.redirect('/blog/login?q=%s' %q)
+        self.redirect('/blog/login?q=%s' % q)
 
-# --------------------------------    Comment Section        ---------------------------------
+# --------------------------------    Comment Section        -------------
+
 
 class Like(Handler):
 
@@ -460,14 +456,13 @@ class Like(Handler):
 
         if post.contributor == self.get_user():
             error = "no"
-            self.redirect('/blog/%s?q=%s' %(q, error))
-
+            self.redirect('/blog/%s?q=%s' % (q, error))
 
         else:
             post.likes += 1
             post.put()
 
-            self.redirect('/blog/%s' %q)
+            self.redirect('/blog/%s' % q)
 
 
 class Dislike(Handler):
@@ -479,17 +474,17 @@ class Dislike(Handler):
 
         if post.contributor == self.get_user():
             error = "no"
-            self.redirect('/blog/%s?q=%s' %(q, error))
+            self.redirect('/blog/%s?q=%s' % (q, error))
 
         else:
             post.dislikes += 1
             post.put()
 
-            self.redirect('/blog/%s' %q)
+            self.redirect('/blog/%s' % q)
 
 
 class AddComment(Handler):
-    
+
     def get(self):
         self.checkcookie()
         q = self.request.get('q')
@@ -497,7 +492,8 @@ class AddComment(Handler):
 
         username = self.get_user()
 
-        self.render("05_newcomment.html", blogentry = blogentry, comment = '', user = username)
+        self.render(
+            "05_newcomment.html", blogentry=blogentry, comment='', user=username)
 
     def post(self):
         q = self.request.get('q')
@@ -509,20 +505,19 @@ class AddComment(Handler):
         comment = self.request.get('comment')
 
         if edit == 'edit' and comment:
-            #Increment comment counter
-            c = PostComments(postkey = int(q), author = author, comment = comment)
+            # Increment comment counter
+            c = PostComments(postkey=int(q), author=author, comment=comment)
             c.put()
 
             blogentry = self.get_blogentry(q)
             blogentry.commentsnb += 1
             blogentry.put()
 
-        
-        self.redirect('/blog/%s' %q)
-
+        self.redirect('/blog/%s' % q)
 
 
 class EditComment(Handler):
+
     def init(self):
         self.checkcookie()
         q = self.request.get('q')
@@ -534,24 +529,24 @@ class EditComment(Handler):
         username = self.get_user()
 
         return [blogentry, commententry, username]
-    
+
     def get(self):
-        
+
         init_val = self.init()
 
-        self.render("05_newcomment.html", blogentry = init_val[0], 
-                    comment = init_val[1].comment, user = init_val[2], 
-                    error = "in Editing Mode")
+        self.render("05_newcomment.html", blogentry=init_val[0],
+                    comment=init_val[1].comment, user=init_val[2],
+                    error="in Editing Mode")
 
     def post(self):
-        
+
         init_val = self.init()
-        
+
         comment = self.request.get('comment')
         edit = self.request.get('edit')
 
         if edit == 'edit' and comment:
-            #Increment comment counter
+            # Increment comment counter
             init_val[1].comment = comment
             init_val[1].put()
 
@@ -559,20 +554,19 @@ class EditComment(Handler):
             c = init_val[1]
             c = PostComments.delete(c)
 
-            init_val[0].commentsnb = init_val[0].commentsnb -1
+            init_val[0].commentsnb = init_val[0].commentsnb - 1
             init_val[0].put()
 
-        
-        self.redirect('/blog/%s' %init_val[0].key().id())
-       
-# --------------------------------    Legacy Section        ---------------------------------
+        self.redirect('/blog/%s' % init_val[0].key().id())
+
+# --------------------------------    Legacy Section        --------------
+
 
 class Welcome(Handler):
 
     def get(self):
 
         cookie = self.request.cookies.get('id')
-
 
         if security.check_cookie(cookie):
             cookie = int(cookie.split('|')[0])
@@ -585,7 +579,7 @@ class Welcome(Handler):
             self.write('<h1>Bug</h1>')
 
 
-# --------------------------------    Debug Section        ---------------------------------
+# --------------------------------    Debug Section        ---------------
 # helper functions to debug
 
 def cleanupDb(key):
@@ -605,18 +599,15 @@ class Debug(Handler):
 
         k2 = db.GqlQuery("SELECT * FROM UserData ORDER BY Username")
 
-
        # Blog content
 
         k3 = 'solved'
 
         # Comments
 
-
         k4 = PostComments.all().fetch(10)
 
-
-        self.render('99_debug.html', k1= k1, k2= k2, k3 = k3, k4 = k4)
+        self.render('99_debug.html', k1=k1, k2=k2, k3=k3, k4=k4)
 
 # ------------------------------------------------------------------------------------------
 
@@ -635,7 +626,5 @@ app = webapp2.WSGIApplication([
                              ('/blog/logout', Logout),
                              ('/blog/welcome', Welcome),
                              ('/blog/debug', Debug)
-                            ],
-debug=True)
-
-
+],
+    debug=True)
