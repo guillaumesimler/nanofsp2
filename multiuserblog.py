@@ -17,8 +17,12 @@ import jinja2
 import webapp2
 import re
 
-from security import *
 
+# import additional classes
+from security import *
+from models.userdata import UserData
+from models.blogentries import Blogentries
+from models.postcomments import PostComments
 
 from google.appengine.ext import db
 
@@ -81,52 +85,6 @@ class Handler(webapp2.RequestHandler):
         blogentry = db.get(key)
 
         return blogentry
-
-
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# !!!!!!!!!!!!!!!!! DataStore Classes !!!!!!!!!!!!!!!!!
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-# Create the entity (Google Datastore's table)
-# (for more info - please check the readme )
-
-class Blogentries(db.Model):
-    title = db.StringProperty(required=True)
-    bodytext = db.TextProperty(required=True)
-    contributor = db.StringProperty(required=True)
-    date = db.DateTimeProperty(auto_now_add=True)
-    modified = db.DateTimeProperty(auto_now=True)
-    likes = db.IntegerProperty(default=0)
-    dislikes = db.IntegerProperty(default=0)
-    commentsnb = db.IntegerProperty(default=0)
-
-
-class PostComments(db.Model):
-    postkey = db.IntegerProperty(required=True)
-    author = db.StringProperty(required=True)
-    comment = db.TextProperty(required=True)
-    date = db.DateTimeProperty(auto_now_add=True)
-
-    @classmethod
-    def by_postkey(self, id):
-        k = PostComments.all().filter(
-            'postkey =', int(id)).order('-date').fetch(100)
-        return k
-
-
-class UserData(db.Model):
-    Username = db.StringProperty(required=True)
-    hPassword = db.StringProperty(required=True)
-    Email = db.StringProperty()
-
-    @classmethod
-    def by_id(self, uid):
-        return UserData.get_by_id(uid)
-
-    @classmethod
-    def by_name(self, name):
-        k = UserData.all().filter('Username =', name).fetch(1)
-        return k
 
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -267,6 +225,15 @@ class MainPage(Handler):
                     user=username)
 
 
+class DefaultPage(Handler):
+    """
+        A simple handler to avoid a 404 error on the unused 
+        http://guillaume-udacity-blog.appspot.com/
+    """
+    def get(self):
+        self.redirect('/blog')
+
+
 # --------------------    Login & register Section        --------------------
 
 # Helper function for register
@@ -338,7 +305,7 @@ def check_disclaimer(disclaimer, error_message=''):
     """
     check n5: verify the box was checked
     """
-    
+
     if disclaimer != 'on':
         error_message = 'Please accept the conditions to access the blog'
 
@@ -623,7 +590,7 @@ class Debug(Handler):
 # ------------------------------------------------------------------------------------------
 
 # Function triggering the page generation
-app = webapp2.WSGIApplication([
+app = webapp2.WSGIApplication([('/', DefaultPage),
                              ('/blog', MainPage),
                              ('/blog/newpost', NewPost),
                              ('/blog/([0-9]+)', SinglePost),

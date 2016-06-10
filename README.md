@@ -87,9 +87,13 @@ File structure
 ---
 
 The files of the project are the following:
-* **python files**:
+* ** main python files**:
 	- **multiuserblog.py**: the main file of project
 	- **security.py**: for obvious security reasons, the security management is "outsourced" in a file which would have restricted access right in a multi programmer environment
+* ** python data handling files** (stored in models\), describe in the [next section](#section7))
+	- **__init__.py**, the tricky file to enable the upload. [Thanks, Amber from Stackoverflow](http://stackoverflow.com/questions/4142151/python-how-to-import-the-class-within-the-same-directory-or-sub-directory)
+	- **userdata.py** storing the user data
+
 * **templates**:
 	- starting with 0x: the templates managing the views of the main blog. 01 being the generic template head
 	- starting with 1x: the templates managing the login and restructuring. 11 being the specific generic template for these pages
