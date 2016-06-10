@@ -16,7 +16,8 @@ import os
 import jinja2
 import webapp2
 import re
-import security
+
+from security import *
 
 
 from google.appengine.ext import db
@@ -60,14 +61,14 @@ class Handler(webapp2.RequestHandler):
     def checkcookie(self):
         cookie = self.request.cookies.get('id')
 
-        if not cookie or not security.check_cookie(cookie):
+        if not cookie or not check_cookie(cookie):
             q = "Please log in"
             self.redirect('/blog/login?q=' + q)
 
     def get_user(self):
         cookie = self.request.cookies.get('id')
 
-        if cookie and security.check_cookie(cookie):
+        if cookie and check_cookie(cookie):
             cookie = int(cookie.split('|')[0])
 
             username = UserData.get_by_id(cookie).Username
@@ -273,10 +274,12 @@ class MainPage(Handler):
 # and return an error message or an empty
 
 def check_user(username, error_message=''):
+    """"
+    Check n1: matching principles
+        - only digits or letter
+        - min 6 digits
+    """
 
-    # Check n1: matching principles
-    # - only digits or letter
-    # - min 6 digits
     user_re = re.compile(r"^[a-zA-Z0-9_-]{6,20}$")
 
     if not user_re.match(username):
@@ -292,8 +295,10 @@ def check_user(username, error_message=''):
 
 
 def check_fir_pass(fir_password, error_message=''):
+    """
+    Check n3: matching principles (min 6 characters)
+    """
 
-    # Check n3: matching principles (min 6 characters)
     fir_re = re.compile(r"^.{6,20}$")
 
     if not fir_re.match(fir_password):
@@ -303,11 +308,12 @@ def check_fir_pass(fir_password, error_message=''):
 
 
 def check_sec_pass(fir_password, sec_password, error_message=''):
-
-    # check n4: password confirmation.
-    # It is a simplified version. I don't check for the empty string
-    # as the previous check will refuse such an entry and if the second
-    # string would be '', it could not match to the first
+    """
+    check n4: password confirmation.
+    It is a simplified version. I don't check for the empty string
+    as the previous check will refuse such an entry and if the second
+    string would be '', it could not match to the first
+    """
 
     if fir_password != sec_password:
         error_message = "Your passwords don't match"
@@ -316,8 +322,10 @@ def check_sec_pass(fir_password, sec_password, error_message=''):
 
 
 def check_email(email, error_message=''):
+    """
+    check n4: matching principles (only for entry)
+    """
 
-    # check n4: matching principles (only for entry)
     email_re = re.compile(r"^[\S]+@[\S]+.[\S]+$")
 
     if email and not email_re.match(email):
@@ -327,7 +335,10 @@ def check_email(email, error_message=''):
 
 
 def check_disclaimer(disclaimer, error_message=''):
-    # check n4: verify the box was checked
+    """
+    check n5: verify the box was checked
+    """
+    
     if disclaimer != 'on':
         error_message = 'Please accept the conditions to access the blog'
 
@@ -377,7 +388,7 @@ class Register(Handler):
         if mover:
 
             # create the password
-            hPassword = security.make_pw_hash(username, fir_password)
+            hPassword = make_pw_hash(username, fir_password)
 
             # create the database entry
             a = UserData(Username=username, hPassword=hPassword, Email=email)
@@ -385,7 +396,7 @@ class Register(Handler):
 
             # encode the cookie
             key = str(a.key().id())
-            new_cookie = security.encode_cookie(key)
+            new_cookie = encode_cookie(key)
 
             self.response.headers.add_header(
                 'Set-Cookie', 'id=%s; Path=/' % new_cookie)
@@ -415,10 +426,10 @@ class Login(Handler):
         # 1. there must be a registered user
         # 2. the password must be verified
 
-        if check_name and security.check_pw(username, password, check_name[0].hPassword):
+        if check_name and check_pw(username, password, check_name[0].hPassword):
            # creates a secure cookie in case the tests succeed
             key = str(check_name[0].key().id())
-            new_cookie = security.encode_cookie(key)
+            new_cookie = encode_cookie(key)
 
             self.response.headers.add_header(
                 'Set-Cookie', 'id=%s; Path=/' % new_cookie)
@@ -568,7 +579,7 @@ class Welcome(Handler):
 
         cookie = self.request.cookies.get('id')
 
-        if security.check_cookie(cookie):
+        if check_cookie(cookie):
             cookie = int(cookie.split('|')[0])
 
             username = UserData.get_by_id(cookie)

@@ -5,7 +5,8 @@
 #  For obvious security reasons, the security management is
 #  outside the main file
 #
-#  A Program by Guillaume Simlerimport random
+#  A Program by Guillaume Simler
+import random
 import string
 import hashlib
 import hmac
