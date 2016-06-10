@@ -85,17 +85,21 @@ Used resources
 <div id='section6'/>
 File structure
 ---
+After the first review, I tried to structure the file in a MVM configuration
 
 The files of the project are the following:
-* **main python files**:
+* **The Viewmodel File**:
 	- **multiuserblog.py**: the main file of project
-	- **security.py**: for obvious security reasons, the security management is "outsourced" in a file which would have restricted access right in a multi programmer environment
-* **python data handling files** (stored in models\), describe in the [next section](#section7))
-	- **__init__.py**, the tricky file to enable the upload. [Thanks, Amber from Stackoverflow](http://stackoverflow.com/questions/4142151/python-how-to-import-the-class-within-the-same-directory-or-sub-directory)
+
+* **Model files:** (stored in models\), describe in the [next section](#section7))
+	- **__init__.py**, 
 	- **userdata.py** storing the user data
 	- **postcomments.py** storing the comment data
 	- **blogentries.py** storing the blogentry data
 
+
+#### Additional files, templates and helpers
+* **security.py**: for obvious security reasons, the security management is "outsourced" in a file which would have restricted access right in a multi programmer environment (stored in a specific folder)
 * **templates**:
 	- starting with 0x: the templates managing the views of the main blog. 01 being the generic template head
 	- starting with 1x: the templates managing the login and restructuring. 11 being the specific generic template for these pages
