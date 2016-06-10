@@ -1,7 +1,7 @@
 """
 *************** models\blogentries.py ***************
 
-This file handles the Blogentries class, storing the relate
+This file handles the Blogentries class, storing the related
 blog content Google Data Store.
 
 More info in
@@ -19,3 +19,5 @@ class Blogentries(db.Model):
     likes = db.IntegerProperty(default=0)
     dislikes = db.IntegerProperty(default=0)
     commentsnb = db.IntegerProperty(default=0)
+    # This last element is arguably weak (see Readme)
+    likers = db.TextProperty()

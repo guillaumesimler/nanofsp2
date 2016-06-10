@@ -19,7 +19,7 @@ import re
 
 
 # import additional classes
-from security import *
+from security.security import *
 from models.userdata import UserData
 from models.blogentries import Blogentries
 from models.postcomments import PostComments
@@ -137,12 +137,16 @@ class SinglePost(Handler):
 
         comments = PostComments.by_postkey(keyid)
 
+        # This section handles the error message for (dis)likes
         q = self.request.get('q')
 
-        if q == 'no':
+        error = ''
+
+        if q == 'no101':
             error = "Nice try, but it's your post !!!! Be modest and let the other users rate it"
-        else:
-            error = ''
+
+        if q == 'no123':
+            error = "You either hate or love this post. But it is not North Korea. And you're not Kim Jong-un, are you?"
 
         if not blogentry:
             self.error(404)
@@ -185,7 +189,18 @@ class SingleEdit(Handler):
             self.redirect('/blog')
 
     def post(self):
+        """
+        The Post "Edit" function were subject of discussions
+        during the previous review. 
 
+        The first reviewer saw here a non-respect of SRP.
+        I didn't, ... as I would use the radio buttons to 
+        seperate responsibilities
+
+        Otherwise I would refactor the elements similar to my handling of
+        comments and (dislikes) 
+
+        """
         init_val = self.init()
 
         blogentry = init_val[0]
@@ -226,10 +241,12 @@ class MainPage(Handler):
 
 
 class DefaultPage(Handler):
+
     """
         A simple handler to avoid a 404 error on the unused 
         http://guillaume-udacity-blog.appspot.com/
     """
+
     def get(self):
         self.redirect('/blog')
 
@@ -424,39 +441,106 @@ class Logout(Handler):
 
 # --------------------------------    Comment Section        -------------
 
+# Helper functiuon for dislike
+
+
+def add_liker(q, liker):
+    """
+    This funtion add the name of the new liker to a
+    string, which will be splitted in the checking
+    """
+    post = Blogentries.get_by_id(int(q))
+
+    if post.likers:
+        post.likers = post.likers + '|%s' % liker
+
+    else:
+        post.likers = liker
+
+    post.put()
+
 
 class Like(Handler):
 
-    def get(self):
-        q = self.request.get('q')
+    """
+    This class handles the likes. 
+    In the current setting
+    - you can't like or dislike your posts
+    - you can't like AND dislike the same post
+    """
 
+    def get(self):
+        """ 
+        This function is the single function of the
+        class which
+        - takes the "order" fron the url
+        - add the like, the likers name
+        - re-render the original page
+        """
+        q = self.request.get('q')
         post = Blogentries.get_by_id(int(q))
 
-        if post.contributor == self.get_user():
-            error = "no"
+        user = self.get_user()
+
+        # returns as a list the Value of likers or dislikers
+        # stored as a sting
+        if post.likers:
+            likers = post.likers.split('|')
+        else:
+            likers = []
+
+        if post.contributor == user:
+            error = "no101"
+            self.redirect('/blog/%s?q=%s' % (q, error))
+
+        elif user in likers:
+            error = "no123"
             self.redirect('/blog/%s?q=%s' % (q, error))
 
         else:
             post.likes += 1
             post.put()
 
+            add_liker(q, user)
+
             self.redirect('/blog/%s' % q)
 
 
 class Dislike(Handler):
 
+    """
+    This class handles the dislikes. And is a near
+    carbon print of the like class
+    """
+
     def get(self):
+        """
+        Identical to like.like()
+        """
         q = self.request.get('q')
 
         post = Blogentries.get_by_id(int(q))
 
-        if post.contributor == self.get_user():
-            error = "no"
+        user = self.get_user()
+
+        if post.likers:
+            likers = post.likers.split('|')
+        else:
+            likers = []
+
+        if post.contributor == user:
+            error = "no101"
+            self.redirect('/blog/%s?q=%s' % (q, error))
+
+        elif user in likers:
+            error = "no123"
             self.redirect('/blog/%s?q=%s' % (q, error))
 
         else:
             post.dislikes += 1
             post.put()
+
+            add_liker(q, user)
 
             self.redirect('/blog/%s' % q)
 
@@ -585,24 +669,27 @@ class Debug(Handler):
 
         k4 = PostComments.all().fetch(10)
 
-        self.render('99_debug.html', k1=k1, k2=k2, k3=k3, k4=k4)
+        # check likers
+        k5 = Blogentries.all()
+
+        self.render('99_debug.html', k1=k1, k2=k2, k3=k3, k4=k4, k5=k5)
 
 # ------------------------------------------------------------------------------------------
 
 # Function triggering the page generation
 app = webapp2.WSGIApplication([('/', DefaultPage),
-                             ('/blog', MainPage),
-                             ('/blog/newpost', NewPost),
-                             ('/blog/([0-9]+)', SinglePost),
-                             ('/blog/edit', SingleEdit),
-                             ('/blog/comment', AddComment),
-                             ('/blog/editcomment', EditComment),
-                             ('/blog/like', Like),
-                             ('/blog/dislike', Dislike),
-                             ('/blog/register', Register),
-                             ('/blog/login', Login),
-                             ('/blog/logout', Logout),
-                             ('/blog/welcome', Welcome),
-                             ('/blog/debug', Debug)
-],
-    debug=True)
+                               ('/blog', MainPage),
+                               ('/blog/newpost', NewPost),
+                               ('/blog/([0-9]+)', SinglePost),
+                               ('/blog/edit', SingleEdit),
+                               ('/blog/comment', AddComment),
+                               ('/blog/editcomment', EditComment),
+                               ('/blog/like', Like),
+                               ('/blog/dislike', Dislike),
+                               ('/blog/register', Register),
+                               ('/blog/login', Login),
+                               ('/blog/logout', Logout),
+                               ('/blog/welcome', Welcome),
+                               ('/blog/debug', Debug)
+                               ],
+                              debug=True)

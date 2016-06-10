@@ -87,12 +87,14 @@ File structure
 ---
 
 The files of the project are the following:
-* ** main python files**:
+* **main python files**:
 	- **multiuserblog.py**: the main file of project
 	- **security.py**: for obvious security reasons, the security management is "outsourced" in a file which would have restricted access right in a multi programmer environment
-* ** python data handling files** (stored in models\), describe in the [next section](#section7))
+* **python data handling files** (stored in models\), describe in the [next section](#section7))
 	- **__init__.py**, the tricky file to enable the upload. [Thanks, Amber from Stackoverflow](http://stackoverflow.com/questions/4142151/python-how-to-import-the-class-within-the-same-directory-or-sub-directory)
 	- **userdata.py** storing the user data
+	- **postcomments.py** storing the comment data
+	- **blogentries.py** storing the blogentry data
 
 * **templates**:
 	- starting with 0x: the templates managing the views of the main blog. 01 being the generic template head
@@ -120,6 +122,7 @@ The entity (GAE datastore's name for table) is composed of the following element
 	- **likes**, a string with a default value of 0, which will count the number of likes
 	- **dislikes**, a string with a default value of 0, which will count the number of dislikes
 	- **comments**, a string with a default value of 0, which will count the number of comments
+	- **likers**, a table converted in string (with | as seperators) storing the (dis)likers om a text field. Arguably this is a **cheap choice**, which might be OK for a small scale blog. It could run into the data type limitations in a more frequented site. In this case a new table would be a solution.
 
 * **Comments**: this table might be discussed. If no editing would be required it could be a subpart of Blogentries, if it accepts list items
 	- **postkey**, a string which is use as a __primary key__ to link __Blogentries__ and __Comments__+

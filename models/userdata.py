@@ -1,7 +1,7 @@
 """
 *************** models\userdata.py ***************
 
-This file handles the Userdata class, storing the relate
+This file handles the Userdata class, storing the related
 User info Googel Data Store.
 
 More info in
