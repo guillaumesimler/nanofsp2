@@ -63,10 +63,14 @@ class Handler(webapp2.RequestHandler):
                     error=error, user=user)
 
     def checkcookie(self):
+        """
+            Important methods enforcing the authentication
+        """
+
         cookie = self.request.cookies.get('id')
 
         if not cookie or not check_cookie(cookie):
-            q = "Please log in"
+            q = "Secure Zone. Please log in or register"
             self.redirect('/blog/login?q=' + q)
 
     def get_user(self):
@@ -164,7 +168,7 @@ class SinglePost(Handler):
 class SingleEdit(Handler):
 
     def init(self):
-        self.checkcookie()
+        # self.checkcookie()
         username = self.get_user()
 
         keyid = self.request.get('q')
@@ -174,10 +178,8 @@ class SingleEdit(Handler):
 
     def get(self):
 
-        init_val = self.init()
+        blogentry, keyid, username = self.init()
 
-        blogentry = init_val[0]
-        username = init_val[2]
 
         if blogentry:
             self.render_newpost(title=blogentry.title,
@@ -201,11 +203,7 @@ class SingleEdit(Handler):
         comments and (dislikes) 
 
         """
-        init_val = self.init()
-
-        blogentry = init_val[0]
-        keyid = init_val[1]
-        username = init_val[2]
+        blogentry, keyid, username = self.init()
 
         edit = self.request.get("edit")
 
@@ -441,24 +439,6 @@ class Logout(Handler):
 
 # --------------------------------    Comment Section        -------------
 
-# Helper functiuon for dislike
-
-
-def add_liker(q, liker):
-    """
-    This funtion add the name of the new liker to a
-    string, which will be splitted in the checking
-    """
-    post = Blogentries.get_by_id(int(q))
-
-    if post.likers:
-        post.likers = post.likers + '|%s' % liker
-
-    else:
-        post.likers = liker
-
-    post.put()
-
 
 class Like(Handler):
 
@@ -474,34 +454,27 @@ class Like(Handler):
         This function is the single function of the
         class which
         - takes the "order" fron the url
-        - add the like, the likers name
+        - add the like, the liker name
         - re-render the original page
         """
         q = self.request.get('q')
         post = Blogentries.get_by_id(int(q))
 
         user = self.get_user()
-
-        # returns as a list the Value of likers or dislikers
-        # stored as a sting
-        if post.likers:
-            likers = post.likers.split('|')
-        else:
-            likers = []
-
+        liker = post.liker
+     
         if post.contributor == user:
             error = "no101"
             self.redirect('/blog/%s?q=%s' % (q, error))
 
-        elif user in likers:
+        elif user in liker:
             error = "no123"
             self.redirect('/blog/%s?q=%s' % (q, error))
 
         else:
             post.likes += 1
+            liker.append(user)
             post.put()
-
-            add_liker(q, user)
 
             self.redirect('/blog/%s' % q)
 
@@ -520,27 +493,21 @@ class Dislike(Handler):
         q = self.request.get('q')
 
         post = Blogentries.get_by_id(int(q))
-
+        liker = post.liker
         user = self.get_user()
-
-        if post.likers:
-            likers = post.likers.split('|')
-        else:
-            likers = []
 
         if post.contributor == user:
             error = "no101"
             self.redirect('/blog/%s?q=%s' % (q, error))
 
-        elif user in likers:
+        elif user in liker:
             error = "no123"
             self.redirect('/blog/%s?q=%s' % (q, error))
 
         else:
             post.dislikes += 1
+            liker.append(user)
             post.put()
-
-            add_liker(q, user)
 
             self.redirect('/blog/%s' % q)
 
@@ -669,7 +636,7 @@ class Debug(Handler):
 
         k4 = PostComments.all().fetch(10)
 
-        # check likers
+        # check liker
         k5 = Blogentries.all()
 
         self.render('99_debug.html', k1=k1, k2=k2, k3=k3, k4=k4, k5=k5)

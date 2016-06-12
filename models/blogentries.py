@@ -19,5 +19,6 @@ class Blogentries(db.Model):
     likes = db.IntegerProperty(default=0)
     dislikes = db.IntegerProperty(default=0)
     commentsnb = db.IntegerProperty(default=0)
-    # This last element is arguably weak (see Readme)
-    likers = db.TextProperty()
+    # This last element was arguably weak (see Readme), updated
+    # thanks to a good review
+    liker = db.StringListProperty()

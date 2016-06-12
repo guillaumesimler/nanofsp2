@@ -126,7 +126,7 @@ The entity (GAE datastore's name for table) is composed of the following element
 	- **likes**, a string with a default value of 0, which will count the number of likes
 	- **dislikes**, a string with a default value of 0, which will count the number of dislikes
 	- **comments**, a string with a default value of 0, which will count the number of comments
-	- **likers**, a table converted in string (with | as seperators) storing the (dis)likers om a text field. Arguably this is a **cheap choice**, which might be OK for a small scale blog. It could run into the data type limitations in a more frequented site. In this case a new table would be a solution.
+	- **liker**, a StringList, one great Input after the second review!!!!
 
 * **Comments**: this table might be discussed. If no editing would be required it could be a subpart of Blogentries, if it accepts list items
 	- **postkey**, a string which is use as a __primary key__ to link __Blogentries__ and __Comments__+
