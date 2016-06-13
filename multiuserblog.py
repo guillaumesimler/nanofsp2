@@ -105,7 +105,7 @@ class NewPost(Handler):
         self.render_newpost()
 
     def post(self):
-
+        self.checkcookie()
         title = self.request.get("title")
         bodytext = self.request.get("bodytext")
         edit = self.request.get("edit")
@@ -160,6 +160,7 @@ class SinglePost(Handler):
                     error=error, user=username)
 
     def post(self, keyid):
+        self.checkcookie()
         blogentry = self.get_blogentry(keyid)
 
         self.redirect("/blog/edit?q=" + str(blogentry.key().id()))
@@ -168,7 +169,7 @@ class SinglePost(Handler):
 class SingleEdit(Handler):
 
     def init(self):
-        # self.checkcookie()
+        self.checkcookie()
         username = self.get_user()
 
         keyid = self.request.get('q')
@@ -177,7 +178,6 @@ class SingleEdit(Handler):
         return [blogentry, keyid, username]
 
     def get(self):
-
         blogentry, keyid, username = self.init()
 
 
@@ -457,6 +457,8 @@ class Like(Handler):
         - add the like, the liker name
         - re-render the original page
         """
+
+        self.checkcookie()
         q = self.request.get('q')
         post = Blogentries.get_by_id(int(q))
 
@@ -490,6 +492,7 @@ class Dislike(Handler):
         """
         Identical to like.like()
         """
+        self.checkcookie()
         q = self.request.get('q')
 
         post = Blogentries.get_by_id(int(q))
@@ -525,6 +528,7 @@ class AddComment(Handler):
             "05_newcomment.html", blogentry=blogentry, comment='', user=username)
 
     def post(self):
+        self.checkcookie()
         q = self.request.get('q')
         blogentry = self.get_blogentry(q)
 
