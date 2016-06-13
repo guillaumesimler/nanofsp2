@@ -516,25 +516,31 @@ class Dislike(Handler):
 
 
 class AddComment(Handler):
-
-    def get(self):
+    def init(self):
+        '''
+        Initialize the the edit of the comments
+        Starting with authentication
+        '''
+        
         self.checkcookie()
         q = self.request.get('q')
         blogentry = self.get_blogentry(q)
-
         username = self.get_user()
+
+        return q, blogentry, username
+
+    def get(self):
+        
+        q, blogentry, username =  self.init()
 
         self.render(
             "05_newcomment.html", blogentry=blogentry, comment='', user=username)
 
     def post(self):
-        self.checkcookie()
-        q = self.request.get('q')
-        blogentry = self.get_blogentry(q)
 
+        q, blogentry, author =  self.init()
+        
         edit = self.request.get('edit')
-
-        author = self.get_user()
         comment = self.request.get('comment')
 
         if edit == 'edit' and comment:
@@ -552,45 +558,50 @@ class AddComment(Handler):
 class EditComment(Handler):
 
     def init(self):
+        '''
+        Initialize the the edit of the comments
+        Starting with authentication
+        '''
+        
         self.checkcookie()
         q = self.request.get('q')
         r = self.request.get('r')
 
         blogentry = self.get_blogentry(q)
-        commententry = PostComments.get_by_id(int(r))
+        postcomment = PostComments.get_by_id(int(r))
 
         username = self.get_user()
 
-        return [blogentry, commententry, username]
+        return [blogentry, postcomment, username]
 
     def get(self):
 
-        init_val = self.init()
+        blogentry, postcomment, username = self.init()
 
-        self.render("05_newcomment.html", blogentry=init_val[0],
-                    comment=init_val[1].comment, user=init_val[2],
+        self.render("05_newcomment.html", blogentry=blogentry,
+                    comment=postcomment.comment, user=username,
                     error="in Editing Mode")
 
     def post(self):
 
-        init_val = self.init()
+        blogentry, postcomment, username = self.init()
 
         comment = self.request.get('comment')
         edit = self.request.get('edit')
 
         if edit == 'edit' and comment:
             # Increment comment counter
-            init_val[1].comment = comment
-            init_val[1].put()
+            postcomment.comment = comment
+            postcomment.put()
 
         if edit == 'delete' or not comment:
-            c = init_val[1]
+            c = postcomment
             c = PostComments.delete(c)
 
-            init_val[0].commentsnb = init_val[0].commentsnb - 1
-            init_val[0].put()
+            blogentry.commentsnb = blogentry.commentsnb - 1
+            blogentry.put()
 
-        self.redirect('/blog/%s' % init_val[0].key().id())
+        self.redirect('/blog/%s' % blogentry.key().id())
 
 # --------------------------------    Legacy Section        --------------
 
