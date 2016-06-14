@@ -62,18 +62,22 @@ class Handler(webapp2.RequestHandler):
         self.render("04_newpost.html", title=title, bodytext=bodytext,
                     error=error, user=user)
 
-    def checkcookie(self):
+    def failedauth(self):
         """
-            Important methods enforcing the authentication
+        In replacement of a first weak, misleading 
+        first authentication
+
+        This method only organizes the redirection
         """
-
-        cookie = self.request.cookies.get('id')
-
-        if not cookie or not check_cookie(cookie):
-            q = "Secure Zone. Please log in or register"
-            self.redirect('/blog/login?q=' + q)
+        q = "Secure Zone. Please log in or register"
+        self.redirect('/blog/login?q=' + q)
 
     def get_user(self):
+        """
+            Important methods
+            - checking the authentication
+            - returning the username in case of sucess
+        """
         cookie = self.request.cookies.get('id')
 
         if cookie and check_cookie(cookie):
@@ -100,129 +104,143 @@ class Handler(webapp2.RequestHandler):
 class NewPost(Handler):
 
     def get(self):
-        self.checkcookie()
         username = self.get_user()
-        self.render_newpost()
+        
+        if username:
+            self.render_newpost()
+        else:
+            self.failedauth()
 
     def post(self):
-        self.checkcookie()
-        title = self.request.get("title")
-        bodytext = self.request.get("bodytext")
-        edit = self.request.get("edit")
-
+        
         username = self.get_user()
+        
+        if username:
+            title = self.request.get("title")
+            bodytext = self.request.get("bodytext")
+            edit = self.request.get("edit")
 
-        if bodytext and title:
-            if edit == "edit":
-                b = Blogentries(title=title, bodytext=bodytext,
-                                contributor=username)
-                b.put()
+            
 
-                key = b.key().id()
+            if bodytext and title:
+                if edit == "edit":
+                    b = Blogentries(title=title, bodytext=bodytext,
+                                    contributor=username)
+                    b.put()
 
-                self.redirect('/blog/%s' % str(key))
+                    key = b.key().id()
+
+                    self.redirect('/blog/%s' % str(key))
+
+                else:
+                    self.redirect('/blog')
 
             else:
-                self.redirect('/blog')
+                error = "Something went wrong. The title or the bodytext were not filled"
+
+                self.render_newpost(title, bodytext, error)
 
         else:
-            error = "Something went wrong. The title or the bodytext were not filled"
-
-            self.render_newpost(title, bodytext, error)
+            self.failedauth()
 
 
 class SinglePost(Handler):
+    def init(self, keyid):
+        username = self.get_user()
+        blogentry = self.get_blogentry(keyid)
+
+        return username, blogentry 
 
     def get(self, keyid):
-        self.checkcookie()
-        username = self.get_user()
+        username, blogentry = self.init(keyid)
 
-        blogentry = self.get_blogentry(keyid)
+        if username:
+            comments = PostComments.by_postkey(keyid)
 
-        comments = PostComments.by_postkey(keyid)
+            # This section handles the error message for (dis)likes
+            q = self.request.get('q')
 
-        # This section handles the error message for (dis)likes
-        q = self.request.get('q')
+            error = ''
 
-        error = ''
+            if q == 'no101':
+                error = "Nice try, but it's your post !!!! Be modest and let the other users rate it"
 
-        if q == 'no101':
-            error = "Nice try, but it's your post !!!! Be modest and let the other users rate it"
+            if q == 'no123':
+                error = "You either hate or love this post. But it is not North Korea. And you're not Kim Jong-un, are you?"
 
-        if q == 'no123':
-            error = "You either hate or love this post. But it is not North Korea. And you're not Kim Jong-un, are you?"
+            if not blogentry:
+                self.error(404)
 
-        if not blogentry:
-            self.error(404)
-
-        self.render("03_singlepost.html", blogentry=blogentry,
-                    username=username, comments=comments,
-                    error=error, user=username)
+            self.render("03_singlepost.html", blogentry=blogentry,
+                        username=username, comments=comments,
+                        error=error, user=username)
+        else:
+            self.failedauth()
 
     def post(self, keyid):
-        self.checkcookie()
-        blogentry = self.get_blogentry(keyid)
+        username, blogentry = self.init(keyid)
 
-        self.redirect("/blog/edit?q=" + str(blogentry.key().id()))
+        if username:
+            self.redirect("/blog/edit?q=" + str(blogentry.key().id()))
+        else:
+            self.failedauth()
 
 
 class SingleEdit(Handler):
 
     def init(self):
-        self.checkcookie()
         username = self.get_user()
 
         keyid = self.request.get('q')
         blogentry = self.get_blogentry(keyid)
 
-        return [blogentry, keyid, username]
+        return blogentry, keyid, username
 
     def get(self):
         blogentry, keyid, username = self.init()
 
+        if username:
+            if blogentry:
+                self.render_newpost(title=blogentry.title,
+                                    bodytext=blogentry.bodytext,
+                                    error="in Editing Mode",
+                                    user=username)
 
-        if blogentry:
-            self.render_newpost(title=blogentry.title,
-                                bodytext=blogentry.bodytext,
-                                error="in Editing Mode",
-                                user=username)
-
-        else:
-            self.redirect('/blog')
+            else:
+                self.redirect('/blog')
+        else: 
+            self.failedauth()
 
     def post(self):
         """
         The Post "Edit" function were subject of discussions
         during the previous review. 
 
-        The first reviewer saw here a non-respect of SRP.
-        I didn't, ... as I would use the radio buttons to 
-        seperate responsibilities
-
-        Otherwise I would refactor the elements similar to my handling of
-        comments and (dislikes) 
-
         """
         blogentry, keyid, username = self.init()
 
-        edit = self.request.get("edit")
+        if username:
+            edit = self.request.get("edit")
 
-        if edit == "edit":
-            title = self.request.get("title")
-            bodytext = self.request.get("bodytext")
+            if edit == "edit":
+                title = self.request.get("title")
+                bodytext = self.request.get("bodytext")
 
-            blogentry.title = title
-            blogentry.bodytext = bodytext
+                blogentry.title = title
+                blogentry.bodytext = bodytext
 
-            blogentry.put()
+                blogentry.put()
 
-            self.redirect('/blog/' + str(keyid))
+                self.redirect('/blog/' + str(keyid))
 
-        elif edit == "delete":
+            elif edit == "delete":
 
-            k = Blogentries.delete(blogentry)
+                k = Blogentries.delete(blogentry)
 
-        self.redirect('/blog')
+            self.redirect('/blog')
+        
+        else:
+            self.failedauth()
 
 
 class MainPage(Handler):
@@ -458,27 +476,31 @@ class Like(Handler):
         - re-render the original page
         """
 
-        self.checkcookie()
-        q = self.request.get('q')
-        post = Blogentries.get_by_id(int(q))
-
         user = self.get_user()
-        liker = post.liker
-     
-        if post.contributor == user:
-            error = "no101"
-            self.redirect('/blog/%s?q=%s' % (q, error))
 
-        elif user in liker:
-            error = "no123"
-            self.redirect('/blog/%s?q=%s' % (q, error))
+        if user:
+            q = self.request.get('q')
+            post = Blogentries.get_by_id(int(q))
 
+            
+            liker = post.liker
+         
+            if post.contributor == user:
+                error = "no101"
+                self.redirect('/blog/%s?q=%s' % (q, error))
+
+            elif user in liker:
+                error = "no123"
+                self.redirect('/blog/%s?q=%s' % (q, error))
+
+            else:
+                post.likes += 1
+                liker.append(user)
+                post.put()
+
+                self.redirect('/blog/%s' % q)
         else:
-            post.likes += 1
-            liker.append(user)
-            post.put()
-
-            self.redirect('/blog/%s' % q)
+            self.failedauth()
 
 
 class Dislike(Handler):
@@ -492,27 +514,31 @@ class Dislike(Handler):
         """
         Identical to like.like()
         """
-        self.checkcookie()
-        q = self.request.get('q')
-
-        post = Blogentries.get_by_id(int(q))
-        liker = post.liker
         user = self.get_user()
 
-        if post.contributor == user:
-            error = "no101"
-            self.redirect('/blog/%s?q=%s' % (q, error))
+        if user:
+            q = self.request.get('q')
 
-        elif user in liker:
-            error = "no123"
-            self.redirect('/blog/%s?q=%s' % (q, error))
+            post = Blogentries.get_by_id(int(q))
+            liker = post.liker
+            
 
+            if post.contributor == user:
+                error = "no101"
+                self.redirect('/blog/%s?q=%s' % (q, error))
+
+            elif user in liker:
+                error = "no123"
+                self.redirect('/blog/%s?q=%s' % (q, error))
+
+            else:
+                post.dislikes += 1
+                liker.append(user)
+                post.put()
+
+                self.redirect('/blog/%s' % q)
         else:
-            post.dislikes += 1
-            liker.append(user)
-            post.put()
-
-            self.redirect('/blog/%s' % q)
+            self.failedauth()
 
 
 class AddComment(Handler):
@@ -522,7 +548,7 @@ class AddComment(Handler):
         Starting with authentication
         '''
         
-        self.checkcookie()
+        
         q = self.request.get('q')
         blogentry = self.get_blogentry(q)
         username = self.get_user()
@@ -533,26 +559,32 @@ class AddComment(Handler):
         
         q, blogentry, username =  self.init()
 
-        self.render(
-            "05_newcomment.html", blogentry=blogentry, comment='', user=username)
+        if username:
+            self.render(
+                "05_newcomment.html", blogentry=blogentry, comment='', user=username)
+        else:
+            self.failedauth()
 
     def post(self):
 
         q, blogentry, author =  self.init()
         
-        edit = self.request.get('edit')
-        comment = self.request.get('comment')
+        if author:
+            edit = self.request.get('edit')
+            comment = self.request.get('comment')
 
-        if edit == 'edit' and comment:
-            # Increment comment counter
-            c = PostComments(postkey=int(q), author=author, comment=comment)
-            c.put()
+            if edit == 'edit' and comment:
+                # Increment comment counter
+                c = PostComments(postkey=int(q), author=author, comment=comment)
+                c.put()
 
-            blogentry = self.get_blogentry(q)
-            blogentry.commentsnb += 1
-            blogentry.put()
+                blogentry = self.get_blogentry(q)
+                blogentry.commentsnb += 1
+                blogentry.put()
 
-        self.redirect('/blog/%s' % q)
+            self.redirect('/blog/%s' % q)
+        else:
+            self.failedauth()
 
 
 class EditComment(Handler):
@@ -563,7 +595,6 @@ class EditComment(Handler):
         Starting with authentication
         '''
         
-        self.checkcookie()
         q = self.request.get('q')
         r = self.request.get('r')
 
@@ -572,36 +603,43 @@ class EditComment(Handler):
 
         username = self.get_user()
 
-        return [blogentry, postcomment, username]
+        return blogentry, postcomment, username
 
     def get(self):
 
         blogentry, postcomment, username = self.init()
 
-        self.render("05_newcomment.html", blogentry=blogentry,
-                    comment=postcomment.comment, user=username,
-                    error="in Editing Mode")
+        if username:
+            self.render("05_newcomment.html", blogentry=blogentry,
+                        comment=postcomment.comment, user=username,
+                        error="in Editing Mode")
+        else:
+            self.failedauth()
 
     def post(self):
 
         blogentry, postcomment, username = self.init()
 
-        comment = self.request.get('comment')
-        edit = self.request.get('edit')
+        if username:
+            comment = self.request.get('comment')
+            edit = self.request.get('edit')
 
-        if edit == 'edit' and comment:
-            # Increment comment counter
-            postcomment.comment = comment
-            postcomment.put()
+            if edit == 'edit' and comment:
+                # Increment comment counter
+                postcomment.comment = comment
+                postcomment.put()
 
-        if edit == 'delete' or not comment:
-            c = postcomment
-            c = PostComments.delete(c)
+            if edit == 'delete' or not comment:
+                c = postcomment
+                c = PostComments.delete(c)
 
-            blogentry.commentsnb = blogentry.commentsnb - 1
-            blogentry.put()
+                blogentry.commentsnb = blogentry.commentsnb - 1
+                blogentry.put()
 
-        self.redirect('/blog/%s' % blogentry.key().id())
+            self.redirect('/blog/%s' % blogentry.key().id())
+        else:
+            self.failedauth()
+
 
 # --------------------------------    Legacy Section        --------------
 
